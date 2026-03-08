@@ -1,0 +1,44 @@
+@import "tailwindcss";
+@source "../node_modules/streamdown/dist/*.js";
+@import "streamdown/styles.css";
+
+/*
+ * Enable class-based dark mode so a toggle can override system preference.
+ * next-themes sets class="dark" on <html>; this makes dark: utilities respond
+ * to that class rather than @media (prefers-color-scheme: dark).
+ */
+@variant dark (&:is(.dark *));
+
+/*
+ * Tailwind CSS v4 — design system configuration lives here in CSS.
+ * No tailwind.config.ts required. Use @theme to define custom tokens
+ * that integrate seamlessly with Tailwind utility classes.
+ *
+ * @see https://tailwindcss.com/docs/v4-beta#css-first-configuration
+ */
+@theme {
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, "Cascadia Code",
+    "Source Code Pro", monospace;
+}
+
+/*
+ * Base UI — required global resets.
+ *
+ * 1. isolation: isolate on [data-base-ui-root] ensures Base UI portals
+ *    paint above all page content by establishing a new stacking context.
+ *
+ * 2. position: relative on <body> is required for iOS 26+ Safari so
+ *    fixed/absolute Base UI popups cover the full viewport correctly.
+ *
+ * @see https://base-ui.com/react/overview/quick-start
+ */
+@layer base {
+  [data-base-ui-root] {
+    isolation: isolate;
+  }
+
+  body {
+    position: relative;
+  }
+}

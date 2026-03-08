@@ -1,0 +1,32 @@
+# ── Dependencies ──────────────────────────────
+node_modules/
+.pnpm-store/
+
+# ── Build output ──────────────────────────────
+/.next/
+/out/
+/build/
+
+# ── Environment (never commit secrets) ────────
+.env
+.env.local
+.env.*.local
+
+# ── Vercel ────────────────────────────────────
+/.vercel/
+
+# ── TypeScript ────────────────────────────────
+*.tsbuildinfo
+next-env.d.ts
+
+# ── OS / Editor ───────────────────────────────
+.DS_Store
+*.pem
+.idea/
+.vscode/settings.json
+
+# ── Debug ─────────────────────────────────────
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
