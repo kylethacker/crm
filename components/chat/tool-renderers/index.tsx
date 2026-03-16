@@ -11,20 +11,10 @@ type RendererProps = { data: unknown };
 type LazyLoader = () => Promise<{ default: ComponentType<RendererProps> }>;
 
 const rendererLoaders: Partial<Record<ToolName, LazyLoader>> = {
-  getWeather: () => import('./weather').then((m) => ({ default: m.WeatherResult as ComponentType<RendererProps> })),
-  searchWikipedia: () => import('./wikipedia').then((m) => ({ default: m.WikipediaResult as ComponentType<RendererProps> })),
-  defineWord: () => import('./dictionary').then((m) => ({ default: m.DictionaryResult as ComponentType<RendererProps> })),
-  getWorldTime: () => import('./world-time').then((m) => ({ default: m.WorldTimeResult as ComponentType<RendererProps> })),
-  getCryptoPrice: () => import('./crypto-price').then((m) => ({ default: m.CryptoPriceResult as ComponentType<RendererProps> })),
-  getCountryInfo: () => import('./country-info').then((m) => ({ default: m.CountryInfoResult as ComponentType<RendererProps> })),
-  getTopHackerNews: () => import('./hacker-news').then((m) => ({ default: m.HackerNewsResult as ComponentType<RendererProps> })),
-  convertUnits: () => import('./unit-converter').then((m) => ({ default: m.UnitConverterResult as ComponentType<RendererProps> })),
-  generateQRCode: () => import('./qr-code').then((m) => ({ default: m.QRCodeResult as ComponentType<RendererProps> })),
-  getExchangeRate: () => import('./exchange-rate').then((m) => ({ default: m.ExchangeRateResult as ComponentType<RendererProps> })),
-  getColorInfo: () => import('./color-info').then((m) => ({ default: m.ColorInfoResult as ComponentType<RendererProps> })),
-  getGitHubUser: () => import('./github-user').then((m) => ({ default: m.GitHubUserResult as ComponentType<RendererProps> })),
-  getJoke: () => import('./joke').then((m) => ({ default: m.JokeResult as ComponentType<RendererProps> })),
-  translateText: () => import('./translate').then((m) => ({ default: m.TranslateResult as ComponentType<RendererProps> })),
+  createInvoice: () => import('./create-invoice').then((m) => ({ default: m.CreateInvoiceResult as ComponentType<RendererProps> })),
+  draftMessage: () => import('./draft-message').then((m) => ({ default: m.DraftMessageResult as ComponentType<RendererProps> })),
+  sendInvoice: () => import('./send-invoice').then((m) => ({ default: m.SendInvoiceResult as ComponentType<RendererProps> })),
+  sendMessage: () => import('./send-message').then((m) => ({ default: m.SendMessageResult as ComponentType<RendererProps> })),
 };
 
 // Pre-create lazy components at module scope so they are stable across renders.

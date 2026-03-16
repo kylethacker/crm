@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils';
 export const Dialog = BaseDialog.Root;
 export const DialogTrigger = BaseDialog.Trigger;
 export const DialogClose = BaseDialog.Close;
+export const DialogPortal = BaseDialog.Portal;
 
 // ── Styled wrappers ───────────────────────────────────────────────────────────
 
@@ -20,7 +21,7 @@ export function DialogBackdrop({
       ref={ref}
       className={cn(
         'fixed inset-0 z-40 bg-black/40 backdrop-blur-sm',
-        'transition-opacity data-[ending-style]:opacity-0 data-[starting-style]:opacity-0',
+        'transition-opacity data-ending-style:opacity-0 data-starting-style:opacity-0',
         className,
       )}
       {...props}
@@ -41,8 +42,8 @@ export function DialogPopup({
         'rounded-xl border border-neutral-200 bg-white p-6 shadow-xl',
         'dark:border-neutral-800 dark:bg-neutral-900',
         'transition-[opacity,transform]',
-        'data-[starting-style]:scale-95 data-[starting-style]:opacity-0',
-        'data-[ending-style]:scale-95 data-[ending-style]:opacity-0',
+        'data-starting-style:scale-95 data-starting-style:opacity-0',
+        'data-ending-style:scale-95 data-ending-style:opacity-0',
         className,
       )}
       {...props}

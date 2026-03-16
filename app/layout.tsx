@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import { Providers } from '@/components/providers';
+import { AppSidebar } from '@/components/app-sidebar';
+import { DevResetButton } from '@/components/dev-reset-button';
 import './globals.css';
 
 // ── Fonts ─────────────────────────────────────────────────────────────────────
@@ -19,10 +21,10 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: 'AI App',
-    template: '%s | AI App',
+    default: 'AI CRM',
+    template: '%s | AI CRM',
   },
-  description: 'Built with Next.js 16, AI SDK v6, and Vercel AI Gateway.',
+  description: 'Your AI-powered CRM coworker for small businesses.',
 };
 
 export const viewport: Viewport = {
@@ -49,7 +51,13 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} relative isolate bg-white text-neutral-950 antialiased dark:bg-neutral-950 dark:text-neutral-50`}
       >
-        <Providers>{children}</Providers>
+        <Providers>
+          <div className="flex h-dvh">
+            <AppSidebar />
+            <main className="min-w-0 flex-1">{children}</main>
+          </div>
+          <DevResetButton />
+        </Providers>
       </body>
     </html>
   );

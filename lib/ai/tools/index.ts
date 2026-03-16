@@ -1,74 +1,49 @@
-import { weatherTool } from './weather';
-import { wikipediaTool } from './wikipedia';
 import { calculateTool } from './calculate';
-import { dictionaryTool } from './dictionary';
-import { worldTimeTool } from './world-time';
-import { cryptoPriceTool } from './crypto-price';
-import { exchangeRateTool } from './exchange-rate';
-import { countryInfoTool } from './country-info';
-import { hackerNewsTool } from './hacker-news';
-import { unitConverterTool } from './unit-converter';
-import { qrCodeTool } from './qr-code';
-import { jokeTool } from './joke';
-import { dadJokeTool } from './dad-joke';
-import { translateTool } from './translate';
-import { ipGeolocationTool } from './ip-geolocation';
-import { colorInfoTool } from './color-info';
-import { githubUserTool } from './github-user';
-import { numberFactTool } from './number-fact';
-import { randomFactTool } from './random-fact';
-import { openLibraryTool } from './open-library';
+import { createInvoiceTool } from './create-invoice';
+import { draftMessageTool } from './draft-message';
+import { sendInvoiceTool } from './send-invoice';
+import { sendMessageTool } from './send-message';
+import { updateContactStatusTool } from './update-contact-status';
+import { addNoteTool } from './add-note';
+import { createBookingTool } from './create-booking';
+import { cancelBookingTool } from './cancel-booking';
+import { recordPaymentTool } from './record-payment';
+import { addTagTool } from './add-tag';
+import { getTodayScheduleTool } from './get-today-schedule';
+import { getContactSummaryTool } from './get-contact-summary';
 
 /**
  * All available tools, keyed by the name the model sees.
  *
- * Scalability notes:
- * - Every tool here is free (no API key required).
- * - Tools that return simple key-value data don't need a custom renderer —
- *   the ToolOutputFallback component handles them automatically.
- * - Only create a custom renderer in tool-renderers/ when the data benefits
- *   from rich UI (color swatches, avatars, links, special formatting).
- * - At 100+ tools, consider grouping into subdirectories by domain and
- *   merging the exports here, or using dynamic tool selection per query.
+ * Focused on CRM operations — every tool here directly serves
+ * business workflows: invoicing, messaging, scheduling, and
+ * contact management.
  *
  * @see https://v6.ai-sdk.dev/docs/ai-sdk-core/tools-and-tool-calling
  */
 export const tools = {
-  // --- Information & Knowledge ---
-  searchWikipedia: wikipediaTool,
-  defineWord: dictionaryTool,
-  getCountryInfo: countryInfoTool,
-  searchOpenLibrary: openLibraryTool,
-  getGitHubUser: githubUserTool,
-
-  // --- Weather & Location ---
-  getWeather: weatherTool,
-  getWorldTime: worldTimeTool,
-  getIPGeolocation: ipGeolocationTool,
-
-  // --- Finance ---
-  getCryptoPrice: cryptoPriceTool,
-  getExchangeRate: exchangeRateTool,
-
-  // --- Math & Conversion ---
+  // --- Math ---
   calculate: calculateTool,
-  convertUnits: unitConverterTool,
 
-  // --- Language ---
-  translateText: translateTool,
+  // --- Messaging ---
+  draftMessage: draftMessageTool,
+  sendMessage: sendMessageTool,
 
-  // --- Fun & Trivia ---
-  getJoke: jokeTool,
-  getDadJoke: dadJokeTool,
-  getRandomFact: randomFactTool,
-  getNumberFact: numberFactTool,
+  // --- Invoicing ---
+  createInvoice: createInvoiceTool,
+  sendInvoice: sendInvoiceTool,
+  recordPayment: recordPaymentTool,
 
-  // --- Utilities ---
-  generateQRCode: qrCodeTool,
-  getColorInfo: colorInfoTool,
+  // --- Contacts ---
+  updateContactStatus: updateContactStatusTool,
+  addNote: addNoteTool,
+  addTag: addTagTool,
+  getContactSummary: getContactSummaryTool,
 
-  // --- News ---
-  getTopHackerNews: hackerNewsTool,
+  // --- Scheduling ---
+  createBooking: createBookingTool,
+  cancelBooking: cancelBookingTool,
+  getTodaySchedule: getTodayScheduleTool,
 };
 
 export type AppTools = typeof tools;

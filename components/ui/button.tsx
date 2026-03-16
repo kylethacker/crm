@@ -12,7 +12,7 @@ const variants = {
   ghost:
     'bg-transparent text-neutral-700 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-neutral-800',
   destructive:
-    'bg-red-600 text-white hover:bg-red-500 dark:bg-red-500 dark:hover:bg-red-400',
+    'bg-neutral-600 text-white hover:bg-neutral-500 dark:bg-neutral-500 dark:hover:bg-neutral-400',
 } as const;
 
 const sizes = {

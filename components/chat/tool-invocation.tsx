@@ -26,7 +26,7 @@ export function ToolInvocation({ part }: { part: ToolPart }) {
       />
 
       {isError && part.errorText && (
-        <div className="border-t border-neutral-200 bg-red-50 px-3 py-2 text-red-600 dark:border-neutral-800 dark:bg-red-950/30 dark:text-red-400">
+        <div className="border-t border-neutral-200 bg-neutral-100 px-3 py-2 text-neutral-600 dark:border-neutral-800 dark:bg-neutral-800 dark:text-neutral-400">
           {part.errorText}
         </div>
       )}
@@ -58,9 +58,9 @@ function ToolHeader({
   return (
     <div className="flex items-center gap-2 bg-neutral-50 px-3 py-2 font-medium text-neutral-600 dark:bg-neutral-900 dark:text-neutral-400">
       {isError || isDenied ? (
-        <ErrorIcon className="text-red-600 dark:text-red-400" />
+        <ErrorIcon className="text-neutral-600 dark:text-neutral-400" />
       ) : isDone ? (
-        <CheckIcon className="text-green-600 dark:text-green-400" />
+        <CheckIcon className="text-neutral-600 dark:text-neutral-400" />
       ) : (
         <span className="inline-block size-3 animate-spin rounded-full border-2 border-neutral-300 border-t-neutral-600 dark:border-neutral-600 dark:border-t-neutral-300" />
       )}

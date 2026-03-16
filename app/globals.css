@@ -20,6 +20,17 @@
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, "Cascadia Code",
     "Source Code Pro", monospace;
+
+  --animate-fade-in: fadeIn 300ms ease-out forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 /*
@@ -40,5 +51,19 @@
 
   body {
     position: relative;
+  }
+
+  .react-grid-item.react-grid-placeholder {
+    background: oklch(0.6 0 0);
+    border-radius: 0.75rem;
+    opacity: 0.15;
+  }
+
+  .dark .react-grid-item > .react-resizable-handle::after {
+    border-color: rgba(255, 255, 255, 0.3);
+  }
+
+  .react-grid-item > .react-resizable-handle::after {
+    border-color: rgba(0, 0, 0, 0.2);
   }
 }
