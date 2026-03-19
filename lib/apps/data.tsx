@@ -3,7 +3,9 @@
  * Used by the dashboard and activity components.
  */
 
-const agentNames: Array<[string, string]> = [
+import { agentDefinitions } from '@/lib/marketplace/data';
+
+const builtInAgentNames: Array<[string, string]> = [
   ['weekly-social-media', 'Weekly Social Media'],
   ['review-collector', 'Review Collector'],
   ['appointment-reminder', 'Appointment Reminder'],
@@ -18,7 +20,10 @@ const agentNames: Array<[string, string]> = [
   ['email-newsletter', 'Email Newsletter'],
 ];
 
-export const agentNameMap = new Map(agentNames);
+export const agentNameMap = new Map<string, string>([
+  ...builtInAgentNames,
+  ...agentDefinitions.map((a) => [a.id, a.name] as [string, string]),
+]);
 
 export function getAgentName(id: string): string {
   return agentNameMap.get(id) ?? id;

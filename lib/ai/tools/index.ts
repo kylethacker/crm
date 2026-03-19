@@ -12,6 +12,19 @@ import { addTagTool } from './add-tag';
 import { getTodayScheduleTool } from './get-today-schedule';
 import { getContactSummaryTool } from './get-contact-summary';
 
+// --- Agent tools ---
+import { getBusinessConfigTool } from './get-business-config';
+import { getContactsTool } from './get-contacts';
+import { getCalendarSlotsTool } from './get-calendar-slots';
+import { getInvoicesTool } from './get-invoices';
+import { getQuotesTool } from './get-quotes';
+import { getReviewStatusTool } from './get-review-status';
+import { getWeekSummaryTool } from './get-week-summary';
+import { createQuoteTool } from './create-quote';
+import { sendReviewRequestTool } from './send-review-request';
+import { escalateToOwnerTool } from './escalate-to-owner';
+import { logAgentActionTool } from './log-agent-action';
+
 /**
  * All available tools, keyed by the name the model sees.
  *
@@ -44,6 +57,21 @@ export const tools = {
   createBooking: createBookingTool,
   cancelBooking: cancelBookingTool,
   getTodaySchedule: getTodayScheduleTool,
+
+  // --- Agents: Read tools ---
+  getBusinessConfig: getBusinessConfigTool,
+  getContacts: getContactsTool,
+  getCalendarSlots: getCalendarSlotsTool,
+  getInvoices: getInvoicesTool,
+  getQuotes: getQuotesTool,
+  getReviewStatus: getReviewStatusTool,
+  getWeekSummary: getWeekSummaryTool,
+
+  // --- Agents: Action tools ---
+  createQuote: createQuoteTool,
+  sendReviewRequest: sendReviewRequestTool,
+  escalateToOwner: escalateToOwnerTool,
+  logAgentAction: logAgentActionTool,
 };
 
 export type AppTools = typeof tools;

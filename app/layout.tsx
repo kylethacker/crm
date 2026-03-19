@@ -54,7 +54,7 @@ export default function RootLayout({
         <Providers>
           <div className="flex h-dvh">
             <AppSidebar />
-            <main className="min-w-0 flex-1">{children}</main>
+            <main className="min-w-0 flex-1 overflow-y-auto">{children}</main>
           </div>
           <DevResetButton />
         </Providers>

@@ -1,6 +1,5 @@
 import { connection } from 'next/server';
 import { getCrmStats, getAgentActivityStats, getReviewStats, getPipelineStats, getWebsiteAnalyticsStats } from '@/lib/dashboard/stats';
-import { getDashboardInsights } from '@/lib/dashboard/insights';
 import { getDailyBriefing } from '@/lib/dashboard/briefing';
 import { DashboardGrid } from '@/components/dashboard/dashboard-grid';
 
@@ -15,7 +14,6 @@ export default async function DashboardPage() {
   const reviewStats = getReviewStats();
   const pipelineStats = getPipelineStats();
   const websiteAnalyticsStats = getWebsiteAnalyticsStats();
-  const insightsPromise = getDashboardInsights(crmStats, activityStats);
   const briefing = getDailyBriefing();
 
   return (
@@ -25,7 +23,6 @@ export default async function DashboardPage() {
       reviewStats={reviewStats}
       pipelineStats={pipelineStats}
       websiteAnalyticsStats={websiteAnalyticsStats}
-      insightsPromise={insightsPromise}
       briefing={briefing}
     />
   );

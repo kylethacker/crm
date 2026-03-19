@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useCallback, useContext, useMemo, useState, useSyncExternalStore } from 'react';
-import type { ArtifactContext, ContactContext, ChatSession } from './chat-history';
+import type { ArtifactContext, ContactContext, MarketplaceAgentContext, ChatSession } from './chat-history';
 import {
   getChatSessions,
   saveChatSession,
@@ -14,6 +14,7 @@ type CreateSessionOptions = {
   agentName?: ChatSession['agentName'];
   artifactContext?: ArtifactContext;
   contactContext?: ContactContext;
+  marketplaceAgentContext?: MarketplaceAgentContext;
   initialMessage?: string;
 };
 
@@ -60,12 +61,13 @@ export function ChatHistoryProvider({ children }: { children: React.ReactNode })
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
 
   const createSession = useCallback((options?: CreateSessionOptions) => {
-    const { agentName = 'operator', artifactContext, contactContext, initialMessage } = options ?? {};
+    const { agentName = 'operator', artifactContext, contactContext, marketplaceAgentContext, initialMessage } = options ?? {};
     const id = crypto.randomUUID();
     const artifactTitle = artifactContext
       ? ('title' in artifactContext ? artifactContext.title : artifactContext.description)
       : undefined;
     const title = artifactTitle
+      ?? (marketplaceAgentContext ? marketplaceAgentContext.agentName : undefined)
       ?? (contactContext ? `Chat with ${contactContext.name}` : 'New chat');
     const session: ChatSession = {
       id,
@@ -74,6 +76,7 @@ export function ChatHistoryProvider({ children }: { children: React.ReactNode })
       agentName,
       ...(artifactContext && { artifactContext }),
       ...(contactContext && { contactContext }),
+      ...(marketplaceAgentContext && { marketplaceAgentContext }),
       ...(initialMessage && { initialMessage }),
     };
     saveChatSession(session);

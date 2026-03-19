@@ -1,3 +1,11 @@
+export function getInitials(name: string): string {
+  return name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase();
+}
+
+export function formatCurrency(amount: number): string {
+  return `$${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
+
 export function formatRelativeTime(timestamp: string): string {
   const date = new Date(timestamp);
   const diffMs = Date.now() - date.getTime();

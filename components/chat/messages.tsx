@@ -4,7 +4,10 @@ import { useEffect, useRef, useCallback, type RefObject } from 'react';
 import type { UIMessage } from 'ai';
 import { cn } from '@/lib/utils';
 import type { ArtifactContext, ContactContext } from '@/lib/chat/chat-history';
+import { getInitials } from '@/lib/format';
+import type { SuggestedResponse } from '@/lib/chat/suggested-responses';
 import { MessageItem } from './message';
+import { SuggestedResponses } from './suggested-responses';
 
 type MessagesProps = {
   messages: UIMessage[];
@@ -14,9 +17,11 @@ type MessagesProps = {
   onAtBottomChange: (atBottom: boolean) => void;
   artifactContext?: ArtifactContext;
   contactContext?: ContactContext;
+  suggestions?: SuggestedResponse[];
+  onSuggestionSelect?: (text: string) => void;
 };
 
-export function Messages({ messages, isPending, isStreaming, scrollRef, onAtBottomChange, artifactContext, contactContext }: MessagesProps) {
+export function Messages({ messages, isPending, isStreaming, scrollRef, onAtBottomChange, artifactContext, contactContext, suggestions = [], onSuggestionSelect }: MessagesProps) {
   const isAtBottomRef = useRef(true);
   const contentRef = useRef<HTMLDivElement>(null);
 
@@ -90,17 +95,27 @@ export function Messages({ messages, isPending, isStreaming, scrollRef, onAtBott
     <div ref={scrollRef} className="h-full overflow-y-auto" role="log" aria-label="Chat messages">
       <div ref={contentRef} className="mx-auto flex max-w-3xl flex-col gap-6 px-4 pt-16 pb-48">
         {hasContext && <ContextCard artifactContext={artifactContext} contactContext={contactContext} />}
-        {messages.map((message, i) => (
-          <MessageItem
-            key={message.id}
-            message={message}
-            isStreaming={
-              isStreaming &&
-              message.role === 'assistant' &&
-              i === messages.length - 1
-            }
-          />
-        ))}
+        {messages.map((message, i) => {
+          const isLast = i === messages.length - 1;
+          const showSuggestions = isLast && message.role === 'assistant' && suggestions.length > 0 && !isPending;
+
+          return (
+            <div key={message.id}>
+              <MessageItem
+                message={message}
+                isStreaming={isStreaming && message.role === 'assistant' && isLast}
+              />
+              {showSuggestions && onSuggestionSelect && (
+                <div className="mt-3 ml-10">
+                  <SuggestedResponses
+                    suggestions={suggestions}
+                    onSelect={onSuggestionSelect}
+                  />
+                </div>
+              )}
+            </div>
+          );
+        })}
 
         {isPending && messages[messages.length - 1]?.role === 'user' && (
           <div className="flex gap-3">
@@ -241,12 +256,7 @@ function ReviewItemInline({ context }: { context: Extract<ArtifactContext, { typ
 }
 
 function ContactOnlyCard({ contact }: { contact: ContactContext }) {
-  const initials = contact.name
-    .split(' ')
-    .map((n) => n[0])
-    .join('')
-    .slice(0, 2)
-    .toUpperCase();
+  const initials = getInitials(contact.name);
 
   return (
     <div>

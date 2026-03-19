@@ -87,11 +87,20 @@ const contactContextSchema = z.object({
   })).optional(),
 }).optional();
 
+const marketplaceAgentContextSchema = z.object({
+  agentId: z.string(),
+  agentName: z.string(),
+  agentRole: z.string(),
+  autonomy: z.string(),
+  outcomes: z.record(z.number()),
+}).optional();
+
 const chatRequestSchema = z.object({
   messages: z.array(uiMessageSchema).min(1),
   agent: z.enum(AGENT_NAMES).default('operator'),
   artifactContext: artifactContextSchema,
   contactContext: contactContextSchema,
+  marketplaceAgentContext: marketplaceAgentContextSchema,
 });
 
 function buildBusinessContext(): string {
@@ -212,6 +221,26 @@ function buildArtifactSystemMessage(ctx: z.infer<typeof artifactContextSchema>):
   return lines.join('\n');
 }
 
+function buildMarketplaceAgentSystemMessage(ctx: z.infer<typeof marketplaceAgentContextSchema>): string | null {
+  if (!ctx) return null;
+  const lines = [
+    `The user is managing their "${ctx.agentName}" agent (${ctx.agentRole}).`,
+    `Current autonomy level: ${ctx.autonomy}`,
+  ];
+  const entries = Object.entries(ctx.outcomes);
+  if (entries.length > 0) {
+    lines.push('');
+    lines.push('## Agent Outcomes');
+    for (const [key, value] of entries) {
+      lines.push(`- ${key}: ${value.toLocaleString()}`);
+    }
+  }
+  lines.push('');
+  lines.push('The user may ask about this agent\'s performance, recent activity, or want to adjust its behavior.');
+  lines.push('Help the user understand what the agent has been doing and offer recommendations for improving results.');
+  return lines.join('\n');
+}
+
 function buildContactSystemMessage(ctx: z.infer<typeof contactContextSchema>) {
   if (!ctx) return null;
   const lines: string[] = [];
@@ -304,7 +333,7 @@ function buildContactSystemMessage(ctx: z.infer<typeof contactContextSchema>) {
 
 export async function POST(req: Request) {
   try {
-    const { messages, agent: agentName, artifactContext, contactContext } = chatRequestSchema.parse(
+    const { messages, agent: agentName, artifactContext, contactContext, marketplaceAgentContext } = chatRequestSchema.parse(
       await req.json(),
     );
 
@@ -331,6 +360,14 @@ export async function POST(req: Request) {
         id: 'contact-context',
         role: 'system' as const,
         parts: [{ type: 'text' as const, text: buildContactSystemMessage(contactContext)! }],
+      });
+    }
+
+    if (marketplaceAgentContext) {
+      systemMessages.push({
+        id: 'marketplace-agent-context',
+        role: 'system' as const,
+        parts: [{ type: 'text' as const, text: buildMarketplaceAgentSystemMessage(marketplaceAgentContext)! }],
       });
     }
 

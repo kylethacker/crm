@@ -72,6 +72,14 @@ export type ContactContext = {
   recentActivity?: ContactActivitySummary[];
 };
 
+export type MarketplaceAgentContext = {
+  agentId: string;
+  agentName: string;
+  agentRole: string;
+  autonomy: string;
+  outcomes: Record<string, number>;
+};
+
 export type ChatSession = {
   id: string;
   title: string;
@@ -79,6 +87,7 @@ export type ChatSession = {
   agentName: AgentName;
   artifactContext?: ArtifactContext;
   contactContext?: ContactContext;
+  marketplaceAgentContext?: MarketplaceAgentContext;
   initialMessage?: string;
 };
 

@@ -77,15 +77,6 @@ export type PipelineStats = {
   items: PipelineItem[];
 };
 
-export type CardInsight = {
-  cardId: string;
-  reason: string;
-};
-
-export type DashboardInsights = {
-  summary: string;
-  cards: CardInsight[];
-};
 
 export type TrafficSource = {
   source: string;

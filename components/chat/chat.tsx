@@ -8,13 +8,12 @@ import { DefaultChatTransport } from 'ai';
 import { toast } from 'sonner';
 import type { AgentName } from '@/lib/ai/agents';
 import { useChatHistory } from '@/lib/chat/chat-history-context';
-import type { ArtifactContext, ContactContext } from '@/lib/chat/chat-history';
+import type { ArtifactContext, ContactContext, MarketplaceAgentContext } from '@/lib/chat/chat-history';
 import { loadChatMessages, saveChatMessages } from '@/lib/chat/chat-history';
 import { getSuggestedResponses } from '@/lib/chat/suggested-responses';
 import { Messages } from './messages';
 import { ChatInput } from './chat-input';
 import { ChatContextSidebar } from './chat-context-sidebar';
-import { SuggestedResponses } from './suggested-responses';
 
 const consumedSessions = new Set<string>();
 
@@ -39,6 +38,7 @@ export function Chat() {
   );
   const artifactContext = activeSession?.artifactContext;
   const contactContext = activeSession?.contactContext;
+  const marketplaceAgentContext = activeSession?.marketplaceAgentContext;
 
   useEffect(() => {
     if (!activeSessionId) createSession({ agentName: agent });
@@ -53,12 +53,16 @@ export function Chat() {
   const contactContextRef = useRef<ContactContext | undefined>(contactContext);
   contactContextRef.current = contactContext;
 
+  const marketplaceAgentContextRef = useRef<MarketplaceAgentContext | undefined>(marketplaceAgentContext);
+  marketplaceAgentContextRef.current = marketplaceAgentContext;
+
   const transportRef = useRef(
     new DefaultChatTransport({
       body: () => ({
         agent: agentRef.current,
         ...(artifactContextRef.current && { artifactContext: artifactContextRef.current }),
         ...(contactContextRef.current && { contactContext: contactContextRef.current }),
+        ...(marketplaceAgentContextRef.current && { marketplaceAgentContext: marketplaceAgentContextRef.current }),
       }),
     }),
   );
@@ -123,7 +127,7 @@ export function Chat() {
     sendMessage({ text });
   };
 
-  const suggestions = getSuggestedResponses(messages, status);
+  const suggestions = useMemo(() => getSuggestedResponses(messages, status), [messages, status]);
   const showStarters = messages.length === 0 && !isPending;
 
   return (
@@ -172,6 +176,8 @@ export function Chat() {
             onAtBottomChange={setIsAtBottom}
             artifactContext={artifactContext}
             contactContext={contactContext}
+            suggestions={suggestions}
+            onSuggestionSelect={handleSubmit}
           />
         )}
 
@@ -195,11 +201,6 @@ export function Chat() {
             </button>
           )}
 
-          <SuggestedResponses
-            suggestions={suggestions}
-            onSelect={handleSubmit}
-          />
-
           <ChatInput
             onSubmit={handleSubmit}
             onStop={stop}
@@ -215,6 +216,7 @@ export function Chat() {
         contactContext={contactContext}
         messages={messages}
         isStreaming={isStreaming}
+        onSendMessage={handleSubmit}
       />
     </div>
   );

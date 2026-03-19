@@ -5,7 +5,7 @@ let invoiceCounter = 1042;
 
 export const createInvoiceTool = tool({
   description:
-    'Create a new invoice for a contact. Use this when the user wants to send an invoice, bill a client, or create a payment request.',
+    'Create a new invoice for a contact. Use this when the user wants to send an invoice, bill a client, or create a payment request. When editing a previously created invoice, set revisionOf to the original invoice ID.',
   strict: true,
   inputSchema: z.object({
     contactName: z.string().describe('Full name of the contact to invoice'),
@@ -23,8 +23,12 @@ export const createInvoiceTool = tool({
       .describe('Tax rate as a percentage (e.g. 8.5 for 8.5%)'),
     dueDate: z.string().describe('Due date in YYYY-MM-DD format'),
     notes: z.string().optional().describe('Optional notes for the invoice'),
+    revisionOf: z
+      .string()
+      .optional()
+      .describe('ID of the previous invoice this is a revision of. Use when editing an existing invoice.'),
   }),
-  execute: async ({ contactName, items, taxRate, dueDate, notes }) => {
+  execute: async ({ contactName, items, taxRate, dueDate, notes, revisionOf }) => {
     invoiceCounter += 1;
     const subtotal = items.reduce((sum, item) => sum + item.amount, 0);
     const tax = Math.round(subtotal * (taxRate / 100) * 100) / 100;
@@ -43,6 +47,7 @@ export const createInvoiceTool = tool({
       createdAt: new Date().toISOString(),
       dueDate,
       notes: notes ?? undefined,
+      revisionOf: revisionOf ?? undefined,
     };
   },
 });

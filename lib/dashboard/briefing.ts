@@ -1,4 +1,5 @@
 import { getConversations } from '@/lib/messages/mock-data';
+import { activeAgents, getAgentDef, availableAgents, buildHirePrompt, formatTopOutcome, getPendingApprovals } from '@/lib/marketplace/data';
 import { getCrmStats } from './stats';
 
 export type BriefingItem = {
@@ -11,12 +12,27 @@ export type BriefingItem = {
   };
 };
 
+export type TeamReport = {
+  agentName: string;
+  icon: string;
+  outcome: string;
+};
+
+export type TeamGap = {
+  problem: string;
+  agentName: string;
+  prompt: string;
+};
+
 export type DailyBriefing = {
   greeting: string;
   urgentItems: BriefingItem[];
   todaySchedule: BriefingItem[];
   followUps: BriefingItem[];
   wins: BriefingItem[];
+  teamReports: TeamReport[];
+  teamGaps: TeamGap[];
+  pendingApprovals: number;
 };
 
 export function getDailyBriefing(): DailyBriefing {
@@ -109,11 +125,33 @@ export function getDailyBriefing(): DailyBriefing {
     return bDays - aDays;
   });
 
+  // ── Team agent reports ──
+  const teamReports: TeamReport[] = [];
+  for (const a of activeAgents) {
+    if (a.paused) continue;
+    const def = getAgentDef(a.agentId);
+    if (!def) continue;
+    const outcome = formatTopOutcome(a.outcomes);
+    if (outcome) {
+      teamReports.push({ agentName: def.name, icon: def.icon, outcome });
+    }
+  }
+
+  // ── Team gaps — problems nobody is handling ──
+  const teamGaps: TeamGap[] = availableAgents.slice(0, 2).map((def) => ({
+    problem: def.problem,
+    agentName: def.name,
+    prompt: buildHirePrompt(def),
+  }));
+
   return {
     greeting,
     urgentItems,
     todaySchedule,
     followUps,
     wins,
+    teamReports,
+    teamGaps,
+    pendingApprovals: getPendingApprovals().length,
   };
 }

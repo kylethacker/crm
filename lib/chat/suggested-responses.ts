@@ -5,9 +5,9 @@ export type SuggestedResponse = {
   text: string;
 };
 
-type ToolPart = Extract<UIMessage['parts'][number], { toolCallId: string }>;
+export type ToolPart = Extract<UIMessage['parts'][number], { toolCallId: string }>;
 
-function getToolName(part: ToolPart): string {
+export function getToolName(part: ToolPart): string {
   return part.type === 'dynamic-tool'
     ? part.toolName
     : part.type.replace(/^tool-/, '');
@@ -15,9 +15,9 @@ function getToolName(part: ToolPart): string {
 
 const toolSuggestions: Record<string, SuggestedResponse[]> = {
   draftMessage: [
-    { label: 'Send it', text: 'Yes, send it' },
+    { label: 'Send it', text: 'Send it' },
     { label: 'Edit', text: 'I want to edit the message' },
-    { label: 'Not now', text: 'Not now' },
+    { label: 'Skip', text: 'Skip this one, move to the next' },
   ],
   createInvoice: [
     { label: 'Send invoice', text: 'Send the invoice' },
@@ -25,8 +25,8 @@ const toolSuggestions: Record<string, SuggestedResponse[]> = {
     { label: 'Not now', text: 'Not now' },
   ],
   sendMessage: [
-    { label: 'Thanks!', text: 'Thanks!' },
-    { label: 'Anything else?', text: 'What else should I handle today?' },
+    { label: 'Next', text: 'Next one' },
+    { label: 'Done', text: 'That\'s all for now, thanks!' },
   ],
   sendInvoice: [
     { label: 'Thanks!', text: 'Thanks!' },
@@ -70,6 +70,15 @@ const textPatterns: Array<{
   pattern: RegExp;
   suggestions: SuggestedResponse[];
 }> = [
+  // Queue-style workflow: when AI presents one item and waits
+  {
+    pattern: /moving on to|next up|let'?s move to|here'?s #?\d|starting with/i,
+    suggestions: [
+      { label: 'Looks good', text: 'Looks good, go ahead' },
+      { label: 'Skip this one', text: 'Skip this one, move to the next' },
+      { label: 'Edit', text: 'I want to change this' },
+    ],
+  },
   {
     pattern: /follow[- ]?up|reach out|check in|haven't heard/i,
     suggestions: [
@@ -96,6 +105,15 @@ const textPatterns: Array<{
     suggestions: [
       { label: 'Reach out', text: 'Draft a re-engagement message' },
       { label: 'Add note', text: 'Add a note about the situation' },
+    ],
+  },
+  // After completing all items in a queue
+  {
+    pattern: /all ?\d* ?(drafts?|messages?|items?|actions?).*ready|that'?s (all|everything)|finished all/i,
+    suggestions: [
+      { label: 'Send all', text: 'Send all of them' },
+      { label: 'Done', text: 'Thanks, that\'s all for now' },
+      { label: 'What else?', text: 'What else should I handle today?' },
     ],
   },
 ];

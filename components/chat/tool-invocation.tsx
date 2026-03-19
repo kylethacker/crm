@@ -1,14 +1,14 @@
 'use client';
 
 import { useState } from 'react';
-import type { UIMessage } from 'ai';
 import { CheckIcon, ErrorIcon } from '@/components/icons';
+import { type ToolPart, getToolName } from '@/lib/chat/suggested-responses';
 import { ToolRenderer, hasToolRenderer } from './tool-renderers';
 
-export type ToolPart = Extract<UIMessage['parts'][number], { toolCallId: string }>;
+export type { ToolPart };
 
 export function ToolInvocation({ part }: { part: ToolPart }) {
-  const toolName = part.type === 'dynamic-tool' ? part.toolName : part.type.replace(/^tool-/, '');
+  const toolName = getToolName(part);
   const isDone = part.state === 'output-available';
   const isError = part.state === 'output-error';
   const isDenied = part.state === 'output-denied';
@@ -17,7 +17,7 @@ export function ToolInvocation({ part }: { part: ToolPart }) {
   const hasRichRender = isDone && output != null && hasToolRenderer(toolName);
 
   return (
-    <div className="overflow-hidden rounded-lg border border-neutral-200 text-xs dark:border-neutral-800">
+    <div data-tool-call-id={part.toolCallId} className="overflow-hidden rounded-lg border border-neutral-200 text-xs transition-shadow duration-500 dark:border-neutral-800">
       <ToolHeader
         toolName={toolName}
         isDone={isDone}

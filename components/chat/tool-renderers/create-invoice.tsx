@@ -1,3 +1,5 @@
+import { formatCurrency } from '@/lib/format';
+
 type InvoiceItem = {
   description: string;
   amount: number;
@@ -18,9 +20,6 @@ type InvoiceOutput = {
   notes?: string;
 };
 
-function formatCurrency(amount: number) {
-  return `$${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-}
 
 export function CreateInvoiceResult({ data }: { data: InvoiceOutput }) {
   return (

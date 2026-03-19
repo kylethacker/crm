@@ -12,7 +12,7 @@ export function SuggestedResponses({
   if (suggestions.length === 0) return null;
 
   return (
-    <div className="relative z-10 flex flex-wrap justify-center gap-2">
+    <div className="flex flex-wrap gap-2">
       {suggestions.map((suggestion) => (
         <button
           key={suggestion.label}
