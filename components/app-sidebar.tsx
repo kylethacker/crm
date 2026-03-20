@@ -6,7 +6,33 @@ import { cn } from '@/lib/utils';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { XIcon } from '@/components/icons';
 import { useChatHistory } from '@/lib/chat/chat-history-context';
+import { useViews } from '@/lib/views/context';
 import { formatRelativeTime } from '@/lib/format';
+
+const viewTypeIcons: Record<string, React.ReactNode> = {
+  contacts: (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+      <circle cx="9" cy="7" r="4" />
+    </svg>
+  ),
+  invoices: (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+      <polyline points="14 2 14 8 20 8" />
+      <line x1="16" y1="13" x2="8" y2="13" />
+      <line x1="16" y1="17" x2="8" y2="17" />
+    </svg>
+  ),
+  quotes: (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+      <polyline points="14 2 14 8 20 8" />
+      <line x1="12" y1="18" x2="12" y2="12" />
+      <line x1="9" y1="15" x2="15" y2="15" />
+    </svg>
+  ),
+};
 
 const navItems = [
   {
@@ -49,6 +75,7 @@ export function AppSidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const { sessions, activeSessionId, createSession, selectSession, deleteSession } = useChatHistory();
+  const { views, removeView } = useViews();
 
   const handleNewChat = () => {
     createSession();
@@ -91,6 +118,58 @@ export function AppSidebar() {
           );
         })}
       </nav>
+
+      {/* Views */}
+      {views.length > 0 && (
+        <>
+          <div className="mx-3 my-3 border-t border-neutral-200 dark:border-neutral-800" />
+          <div className="shrink-0 px-3">
+            <p className="mb-1 px-2.5 text-[10px] font-medium uppercase tracking-wider text-neutral-400">
+              Views
+            </p>
+            <div className="flex flex-col gap-0.5">
+              {views.map((view) => {
+                const isActive = pathname === `/views/${view.id}`;
+                return (
+                  <Link
+                    key={view.id}
+                    href={`/views/${view.id}`}
+                    className={cn(
+                      'group flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left transition-colors',
+                      isActive
+                        ? 'bg-neutral-200 text-neutral-900 dark:bg-neutral-700 dark:text-neutral-100'
+                        : 'text-neutral-500 hover:bg-neutral-200/60 hover:text-neutral-700 dark:hover:bg-neutral-800 dark:hover:text-neutral-300',
+                    )}
+                  >
+                    <span className="shrink-0">{viewTypeIcons[view.type]}</span>
+                    <span className="min-w-0 flex-1 truncate text-sm font-medium">{view.name}</span>
+                    <span
+                      role="button"
+                      tabIndex={0}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        removeView(view.id);
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          removeView(view.id);
+                        }
+                      }}
+                      className="shrink-0 rounded p-0.5 opacity-0 transition-opacity hover:bg-neutral-300/60 group-hover:opacity-100 dark:hover:bg-neutral-600"
+                      aria-label={`Remove ${view.name} view`}
+                    >
+                      <XIcon width={12} height={12} />
+                    </span>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        </>
+      )}
 
       {/* Divider */}
       <div className="mx-3 my-3 border-t border-neutral-200 dark:border-neutral-800" />
