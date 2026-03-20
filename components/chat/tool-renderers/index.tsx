@@ -13,6 +13,9 @@ type LazyLoader = () => Promise<{ default: ComponentType<RendererProps> }>;
 const rendererLoaders: Partial<Record<ToolName, LazyLoader>> = {
   createInvoice: () => import('./create-invoice').then((m) => ({ default: m.CreateInvoiceResult as ComponentType<RendererProps> })),
   draftMessage: () => import('./draft-message').then((m) => ({ default: m.DraftMessageResult as ComponentType<RendererProps> })),
+  getContacts: () => import('./get-contacts').then((m) => ({ default: m.GetContactsResult as ComponentType<RendererProps> })),
+  getInvoices: () => import('./get-invoices').then((m) => ({ default: m.GetInvoicesResult as ComponentType<RendererProps> })),
+  getQuotes: () => import('./get-quotes').then((m) => ({ default: m.GetQuotesResult as ComponentType<RendererProps> })),
   sendInvoice: () => import('./send-invoice').then((m) => ({ default: m.SendInvoiceResult as ComponentType<RendererProps> })),
   sendMessage: () => import('./send-message').then((m) => ({ default: m.SendMessageResult as ComponentType<RendererProps> })),
 };

@@ -12,6 +12,22 @@ export type AgentTrigger = {
   description: string;
 };
 
+/** How the agent operates */
+export type AgentMode = 'inbound' | 'scheduled' | 'reactive' | 'on-demand';
+
+/** Declarative setting definition — rendered as UI controls */
+export type AgentSettingDef =
+  | { key: string; label: string; description?: string; type: 'select'; options: { value: string; label: string }[]; default: string }
+  | { key: string; label: string; description?: string; type: 'number'; min?: number; max?: number; unit?: string; default: number }
+  | { key: string; label: string; description?: string; type: 'text'; placeholder?: string; default: string }
+  | { key: string; label: string; description?: string; type: 'toggle'; default: boolean };
+
+/** Sparse map of user-overridden setting values */
+export type AgentSettings = Record<string, string | number | boolean>;
+
+/** Tools that always need approval regardless of autonomy */
+export type AgentGuardrail = { tool: string; reason: string };
+
 /** A concrete thing the agent did or wants to do */
 export type AgentAction = {
   id: string;
@@ -47,6 +63,14 @@ export type AgentDefinition = {
   highlights?: string[];
   /** Social proof — what this agent has achieved for others */
   expectedOutcome?: string;
+  /** How the agent operates */
+  mode: AgentMode;
+  /** Agent-specific system prompt — uses {{key}} interpolation for settings */
+  systemPrompt: string;
+  /** Declarative schema for owner-configurable settings */
+  settings?: AgentSettingDef[];
+  /** Tools that always need approval regardless of autonomy */
+  guardrails?: AgentGuardrail[];
 };
 
 export type ActiveAgent = {
@@ -58,4 +82,6 @@ export type ActiveAgent = {
   outcomes: Record<string, number>;
   /** Recent actions for the activity feed */
   recentActions: AgentAction[];
+  /** Sparse overrides — only changed setting keys stored */
+  settings?: AgentSettings;
 };

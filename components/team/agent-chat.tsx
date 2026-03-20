@@ -4,26 +4,36 @@ import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { useChat } from '@ai-sdk/react';
 import { DefaultChatTransport } from 'ai';
 import type { MarketplaceAgentContext } from '@/lib/chat/chat-history';
+import type { AgentSettings } from '@/lib/marketplace/types';
 import { getSuggestedResponses } from '@/lib/chat/suggested-responses';
 import { MessageItem } from '@/components/chat/message';
 import { ArrowUpIcon, StopIcon } from '@/components/icons';
 
-type AgentChatSidebarProps = {
+type AgentChatProps = {
   agentContext: MarketplaceAgentContext;
+  agentSettings?: AgentSettings;
+  /** Auto-send this message on mount (used for onboarding after hire) */
+  initialMessage?: string;
 };
 
-export function AgentChatSidebar({ agentContext }: AgentChatSidebarProps) {
+export function AgentChat({ agentContext, agentSettings, initialMessage }: AgentChatProps) {
   const [input, setInput] = useState('');
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const initialSent = useRef(false);
 
   const agentContextRef = useRef(agentContext);
   agentContextRef.current = agentContext;
+
+  const agentSettingsRef = useRef(agentSettings);
+  agentSettingsRef.current = agentSettings;
 
   const transportRef = useRef(
     new DefaultChatTransport({
       body: () => ({
         agent: 'operator' as const,
+        marketplaceAgentId: agentContextRef.current.agentId,
+        agentSettings: agentSettingsRef.current,
         marketplaceAgentContext: agentContextRef.current,
       }),
     }),
@@ -36,6 +46,14 @@ export function AgentChatSidebar({ agentContext }: AgentChatSidebarProps) {
 
   const isPending = status === 'submitted' || status === 'streaming';
   const isStreaming = status === 'streaming';
+
+  // Auto-send initial message for onboarding
+  useEffect(() => {
+    if (initialMessage && !initialSent.current) {
+      initialSent.current = true;
+      sendMessage({ text: initialMessage });
+    }
+  }, [initialMessage, sendMessage]);
 
   // Auto-scroll to bottom
   useEffect(() => {
@@ -70,7 +88,7 @@ export function AgentChatSidebar({ agentContext }: AgentChatSidebarProps) {
   const suggestions = useMemo(() => getSuggestedResponses(messages, status), [messages, status]);
 
   return (
-    <div className="flex h-full flex-col border-l border-neutral-200/60 bg-neutral-50/50 dark:border-neutral-800/60 dark:bg-neutral-950/50">
+    <div className="flex flex-1 flex-col">
       {/* Messages */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4">
         {messages.length === 0 ? (
@@ -99,7 +117,7 @@ export function AgentChatSidebar({ agentContext }: AgentChatSidebarProps) {
             </div>
           </div>
         ) : (
-          <div className="flex flex-col gap-4">
+          <div className="mx-auto flex max-w-[720px] flex-col gap-4">
             {messages.map((msg) => (
               <MessageItem key={msg.id} message={msg} isStreaming={isStreaming && msg.id === messages[messages.length - 1]?.id} />
             ))}
@@ -129,13 +147,13 @@ export function AgentChatSidebar({ agentContext }: AgentChatSidebarProps) {
       </div>
 
       {/* Input */}
-      <div className="border-t border-neutral-200/60 px-3 py-3 dark:border-neutral-800/60">
+      <div className="border-t border-neutral-200/60 px-4 py-3 dark:border-neutral-800/60">
         <form
           onSubmit={(e) => {
             e.preventDefault();
             handleSubmit(input);
           }}
-          className="relative overflow-hidden rounded-xl bg-white shadow-[0_1px_2px_rgba(0,0,0,0.04),0_0_0_1px_rgba(0,0,0,0.06)] dark:bg-neutral-900 dark:shadow-[0_1px_2px_rgba(0,0,0,0.2),0_0_0_1px_rgba(255,255,255,0.06)]"
+          className="relative mx-auto max-w-[720px] overflow-hidden rounded-xl bg-white shadow-[0_1px_2px_rgba(0,0,0,0.04),0_0_0_1px_rgba(0,0,0,0.06)] dark:bg-neutral-900 dark:shadow-[0_1px_2px_rgba(0,0,0,0.2),0_0_0_1px_rgba(255,255,255,0.06)]"
         >
           <textarea
             ref={textareaRef}

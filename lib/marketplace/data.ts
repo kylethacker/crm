@@ -1,5 +1,13 @@
 import type { AgentDefinition, ActiveAgent } from './types';
 
+// ── Shared setting options ──────────────────────────────────────────────────
+
+const toneOptions = [
+  { value: 'friendly', label: 'Friendly' },
+  { value: 'professional', label: 'Professional' },
+  { value: 'casual', label: 'Casual' },
+];
+
 // ── Agent definitions ────────────────────────────────────────────────────────
 // Each agent: what it monitors, what tools it uses, what it does.
 
@@ -24,6 +32,27 @@ export const agentDefinitions: AgentDefinition[] = [
       'Books ready-to-go leads automatically',
       'Escalates complex inquiries to you',
     ],
+    mode: 'inbound',
+    systemPrompt: `You are the instant lead responder for this business.
+
+## Personality
+- Tone: {{tone}}
+- You represent the business directly — customers don't know you're an AI
+
+## Rules
+- Respond to new inquiries within {{maxResponseMinutes}} minute(s)
+- Personalize every response using the lead's inquiry details
+- {{qualifyFirst}} → If true: ask qualifying questions before booking. If false: move straight to booking.
+- {{autoBook}} → If true: book qualified leads directly into available slots. If false: suggest times and let the lead confirm.
+- If the inquiry is complex, high-value, or outside business hours, escalate to the owner
+- Keep messages under 3 sentences unless the question requires more detail
+- Always use the contact's first name`,
+    settings: [
+      { key: 'tone', label: 'Tone', type: 'select', options: toneOptions, default: 'friendly' },
+      { key: 'maxResponseMinutes', label: 'Max response time', type: 'number', min: 1, max: 30, unit: 'minutes', default: 1 },
+      { key: 'autoBook', label: 'Auto-book qualified leads', type: 'toggle', default: false },
+      { key: 'qualifyFirst', label: 'Qualify before booking', type: 'toggle', default: true },
+    ],
   },
   {
     id: 'deal-closer',
@@ -46,6 +75,27 @@ export const agentDefinitions: AgentDefinition[] = [
       'Detects when a quote has been viewed',
       'Knows when to loop you in for the personal touch',
     ],
+    mode: 'reactive',
+    systemPrompt: `You are the deal closer for this business. Your job is to follow up on every open quote until it's won or lost.
+
+## Personality
+- Tone: {{tone}}
+- You represent the business directly — customers don't know you're an AI
+
+## Rules
+- Check for open quotes and proposals daily
+- Send the first follow-up after {{followUpDays}} day(s) with no response
+- Send up to {{maxFollowUps}} follow-ups before pausing
+- Escalate to the owner after {{escalateAfterDays}} days with no progress
+- Personalize follow-ups based on the quote details and client history
+- When a quote is viewed, send a timely follow-up
+- Always use the contact's first name`,
+    settings: [
+      { key: 'tone', label: 'Tone', type: 'select', options: toneOptions, default: 'professional' },
+      { key: 'followUpDays', label: 'Days before first follow-up', type: 'number', min: 1, max: 14, unit: 'days', default: 3 },
+      { key: 'maxFollowUps', label: 'Max follow-ups', type: 'number', min: 1, max: 5, default: 3 },
+      { key: 'escalateAfterDays', label: 'Escalate after', type: 'number', min: 5, max: 30, unit: 'days', default: 10 },
+    ],
   },
   {
     id: 'reputation-builder',
@@ -66,6 +116,30 @@ export const agentDefinitions: AgentDefinition[] = [
       'Picks the right moment — not too soon, not too late',
       'Direct links to Google and Yelp',
       'Tracks your rating and review count over time',
+    ],
+    mode: 'reactive',
+    systemPrompt: `You are the reputation builder for this business. Your job is to get more 5-star reviews from happy customers.
+
+## Personality
+- Tone: {{tone}}
+- You represent the business directly — customers don't know you're an AI
+
+## Rules
+- Wait {{delayHours}} hour(s) after a completed booking before sending a review request
+- {{followUpEnabled}} → If true: send a follow-up if the customer opened but didn't leave a review. If false: send one request only.
+- Preferred platform: {{preferredPlatform}} — include direct links to the preferred platform(s)
+- Never send a review request after a no-show or cancellation
+- Keep messages warm and personal — reference the specific service they received
+- Always use the contact's first name`,
+    settings: [
+      { key: 'tone', label: 'Tone', type: 'select', options: toneOptions, default: 'friendly' },
+      { key: 'delayHours', label: 'Hours after booking to send request', type: 'number', min: 1, max: 72, unit: 'hours', default: 24 },
+      { key: 'followUpEnabled', label: 'Send follow-up if no review', type: 'toggle', default: true },
+      { key: 'preferredPlatform', label: 'Preferred platform', type: 'select', options: [
+        { value: 'google', label: 'Google' },
+        { value: 'yelp', label: 'Yelp' },
+        { value: 'both', label: 'Both' },
+      ], default: 'google' },
     ],
   },
   {
@@ -89,6 +163,25 @@ export const agentDefinitions: AgentDefinition[] = [
       'Sends personalized "we had an opening" messages',
       'Reacts instantly when bookings get cancelled',
     ],
+    mode: 'scheduled',
+    systemPrompt: `You are the slot filler for this business. Your job is to keep the calendar full by filling empty slots and last-minute cancellations.
+
+## Personality
+- Tone: {{tone}}
+- You represent the business directly — customers don't know you're an AI
+
+## Rules
+- Look ahead {{lookAheadDays}} day(s) for empty slots
+- Send up to {{maxMessagesPerDay}} messages per day
+- Prioritize contacts who are overdue for a visit
+- Personalize each message — reference their last visit and the specific opening
+- Never double-book a slot
+- Always use the contact's first name`,
+    settings: [
+      { key: 'tone', label: 'Tone', type: 'select', options: toneOptions, default: 'friendly' },
+      { key: 'lookAheadDays', label: 'Look-ahead window', type: 'number', min: 1, max: 14, unit: 'days', default: 7 },
+      { key: 'maxMessagesPerDay', label: 'Max messages per day', type: 'number', min: 1, max: 10, default: 5 },
+    ],
   },
   {
     id: 'friendly-collector',
@@ -109,6 +202,31 @@ export const agentDefinitions: AgentDefinition[] = [
       'Escalates tone gradually — friendly to firm',
       'Matches tone to your relationship with the client',
       'Flags invoices 15+ days overdue for your attention',
+    ],
+    mode: 'scheduled',
+    systemPrompt: `You are the friendly collector for this business. Your job is to get invoices paid without damaging relationships.
+
+## Personality
+- Reminder style: {{reminderStyle}}
+- You represent the business directly — customers don't know you're an AI
+
+## Rules
+- Send the first reminder {{firstReminderDays}} day(s) after the due date
+- Send follow-up reminders every {{reminderInterval}} day(s)
+- Escalate to the owner after {{escalateAfterDays}} days overdue
+- Start gentle and get more direct with each reminder
+- Reference the specific invoice, amount, and service provided
+- Always use the contact's first name
+- Never be rude or threatening — firm but fair`,
+    settings: [
+      { key: 'reminderStyle', label: 'Reminder style', type: 'select', options: [
+        { value: 'gentle', label: 'Gentle' },
+        { value: 'balanced', label: 'Balanced' },
+        { value: 'direct', label: 'Direct' },
+      ], default: 'gentle' },
+      { key: 'firstReminderDays', label: 'First reminder after due date', type: 'number', min: 1, max: 7, unit: 'days', default: 3 },
+      { key: 'reminderInterval', label: 'Days between reminders', type: 'number', min: 3, max: 14, unit: 'days', default: 7 },
+      { key: 'escalateAfterDays', label: 'Escalate after', type: 'number', min: 7, max: 30, unit: 'days', default: 15 },
     ],
   },
   {
@@ -131,6 +249,25 @@ export const agentDefinitions: AgentDefinition[] = [
       'Drafts personal "we miss you" re-engagement messages',
       'Flags VIP customers for your personal attention',
     ],
+    mode: 'scheduled',
+    systemPrompt: `You are the churn preventer for this business. Your job is to identify at-risk customers and re-engage them before they leave.
+
+## Personality
+- Tone: {{tone}}
+- You represent the business directly — customers don't know you're an AI
+
+## Rules
+- Flag customers inactive for {{inactivityDays}} day(s) or more
+- Customers with lifetime revenue above \${{vipThreshold}} are VIPs — escalate these to the owner for personal outreach
+- Draft personal "we miss you" messages for at-risk regulars
+- Reference their past visits and what they liked
+- Always use the contact's first name
+- Never make the customer feel guilty — focus on what you can offer them`,
+    settings: [
+      { key: 'tone', label: 'Tone', type: 'select', options: toneOptions, default: 'friendly' },
+      { key: 'inactivityDays', label: 'Days of inactivity to flag', type: 'number', min: 14, max: 90, unit: 'days', default: 30 },
+      { key: 'vipThreshold', label: 'VIP revenue threshold', type: 'number', min: 500, max: 10000, unit: '$', default: 1000 },
+    ],
   },
   {
     id: 'week-planner',
@@ -139,7 +276,7 @@ export const agentDefinitions: AgentDefinition[] = [
     problem: 'I spend Sunday night planning my week and it takes forever',
     does: 'Every Sunday evening, pulls together your week: who to follow up with, bookings to prep for, revenue vs. goals, overdue invoices. Gives you the 3 most impactful things to do Monday.',
     triggers: [
-      { type: 'schedule', description: 'Every Sunday at 6pm' },
+      { type: 'schedule', description: 'Every {{deliveryDay}} at 6pm' },
     ],
     tools: ['getContactSummary', 'getContacts', 'getCalendarSlots', 'getInvoices', 'getQuotes', 'getWeekSummary', 'getBusinessConfig', 'logAgentAction'],
     defaultAutonomy: 'auto',
@@ -152,6 +289,84 @@ export const agentDefinitions: AgentDefinition[] = [
       'Identifies the 3 most impactful things for Monday',
       'Tracks overdue invoices and at-risk contacts',
     ],
+    mode: 'scheduled',
+    systemPrompt: `You are the week planner for this business. Your job is to prepare a clear, actionable weekly briefing.
+
+## Rules
+- Deliver the briefing every {{deliveryDay}}
+- Focus on: {{focusAreas}}
+- Identify the 3 most impactful things for Monday
+- Surface overdue follow-ups, upcoming bookings, and revenue status
+- Flag at-risk contacts and overdue invoices
+- Keep it concise and scannable — bullet points, not paragraphs
+- End with a clear "Top 3 priorities" section`,
+    settings: [
+      { key: 'deliveryDay', label: 'Delivery day', type: 'select', options: [
+        { value: 'Friday', label: 'Friday' },
+        { value: 'Saturday', label: 'Saturday' },
+        { value: 'Sunday', label: 'Sunday' },
+      ], default: 'Sunday' },
+      { key: 'focusAreas', label: 'Focus areas', type: 'text', placeholder: 'e.g. follow-ups, revenue, bookings', default: 'follow-ups, revenue, bookings' },
+    ],
+  },
+  {
+    id: 'blog-writer',
+    name: 'Blog Writer',
+    role: 'Writes a weekly blog post for your business',
+    problem: 'I know I should be blogging but I never have time to write',
+    does: 'Every week, pulls together business activity, customer wins, and industry context to write a relevant blog post. Drafts in your voice, on topics your customers care about.',
+    triggers: [
+      { type: 'schedule', description: 'Every {{publishDay}} morning' },
+    ],
+    tools: ['createBlogPost', 'getWeekSummary', 'getContacts', 'getBusinessConfig', 'getReviewStatus', 'logAgentAction', 'escalateToOwner'],
+    defaultAutonomy: 'draft-approve',
+    icon: '✍️',
+    price: 24,
+    expectedOutcome: '4 blog posts per month, written for you',
+    highlights: [
+      'Writes a fresh post every week in your voice',
+      'Pulls from real business activity for authentic content',
+      'Covers topics your customers actually care about',
+      'You review before publishing — or let it auto-publish',
+    ],
+    mode: 'scheduled',
+    systemPrompt: `You are the blog writer for this business. Your job is to write one blog post per week that resonates with the business's customers.
+
+## Personality
+- Tone: {{tone}}
+- Write in the business owner's voice — authentic, not corporate
+
+## Rules
+- Post length: {{postLength}}
+- Topics to cover: {{topics}}
+- Publish day: {{publishDay}}
+- {{autoPublish}} → If true: publish immediately. If false: save as draft for review.
+- Pull from real business activity — recent customer wins, common questions, seasonal trends
+- Include a clear takeaway or call to action
+- Use short paragraphs and subheadings for readability
+- Never make up customer stories — use real data from the CRM`,
+    settings: [
+      { key: 'tone', label: 'Tone', type: 'select', options: [
+        { value: 'professional', label: 'Professional' },
+        { value: 'conversational', label: 'Conversational' },
+        { value: 'thought-leadership', label: 'Thought Leadership' },
+      ], default: 'conversational' },
+      { key: 'postLength', label: 'Post length', type: 'select', options: [
+        { value: 'short ~300 words', label: 'Short (~300 words)' },
+        { value: 'medium ~600 words', label: 'Medium (~600 words)' },
+        { value: 'long ~1000 words', label: 'Long (~1000 words)' },
+      ], default: 'medium ~600 words' },
+      { key: 'topics', label: 'Topics', type: 'text', placeholder: 'e.g. tips, customer stories, industry trends', default: 'tips, customer stories, industry trends' },
+      { key: 'publishDay', label: 'Publish day', type: 'select', options: [
+        { value: 'Monday', label: 'Monday' },
+        { value: 'Tuesday', label: 'Tuesday' },
+        { value: 'Wednesday', label: 'Wednesday' },
+        { value: 'Thursday', label: 'Thursday' },
+        { value: 'Friday', label: 'Friday' },
+      ], default: 'Wednesday' },
+      { key: 'autoPublish', label: 'Auto-publish', type: 'toggle', default: false },
+    ],
+    guardrails: [{ tool: 'createBlogPost', reason: 'Blog posts should be reviewed before publishing' }],
   },
 ];
 

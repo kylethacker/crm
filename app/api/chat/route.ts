@@ -1,8 +1,10 @@
 import { createAgentUIStreamResponse } from 'ai';
 import { z } from 'zod';
-import { agents, AGENT_NAMES } from '@/lib/ai/agents';
+import { agents, AGENT_NAMES, createMarketplaceAgent } from '@/lib/ai/agents';
 import { getConversations } from '@/lib/messages/mock-data';
 import { getCrmStats } from '@/lib/dashboard/stats';
+import { getAgentDef } from '@/lib/marketplace/data';
+import type { AgentSettings } from '@/lib/marketplace/types';
 
 const uiMessageSchema = z
   .object({
@@ -101,6 +103,8 @@ const chatRequestSchema = z.object({
   artifactContext: artifactContextSchema,
   contactContext: contactContextSchema,
   marketplaceAgentContext: marketplaceAgentContextSchema,
+  marketplaceAgentId: z.string().optional(),
+  agentSettings: z.record(z.union([z.string(), z.number(), z.boolean()])).optional(),
 });
 
 function buildBusinessContext(): string {
@@ -333,9 +337,15 @@ function buildContactSystemMessage(ctx: z.infer<typeof contactContextSchema>) {
 
 export async function POST(req: Request) {
   try {
-    const { messages, agent: agentName, artifactContext, contactContext, marketplaceAgentContext } = chatRequestSchema.parse(
-      await req.json(),
-    );
+    const {
+      messages,
+      agent: agentName,
+      artifactContext,
+      contactContext,
+      marketplaceAgentContext,
+      marketplaceAgentId,
+      agentSettings,
+    } = chatRequestSchema.parse(await req.json());
 
     const systemMessages: typeof messages = [];
 
@@ -373,8 +383,17 @@ export async function POST(req: Request) {
 
     const uiMessages = [...systemMessages, ...messages];
 
+    // Use agent-specific prompt + filtered tools when marketplaceAgentId is present
+    let agent: typeof agents[typeof agentName] = agents[agentName];
+    if (marketplaceAgentId) {
+      const def = getAgentDef(marketplaceAgentId);
+      if (def) {
+        agent = createMarketplaceAgent(def, agentSettings as AgentSettings | undefined) as unknown as typeof agent;
+      }
+    }
+
     return createAgentUIStreamResponse({
-      agent: agents[agentName],
+      agent,
       uiMessages,
       abortSignal: req.signal,
     });

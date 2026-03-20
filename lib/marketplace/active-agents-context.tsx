@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useCallback, useContext, useMemo, useState, useEffect } from 'react';
-import type { ActiveAgent, AutonomyLevel, AgentAction } from './types';
+import type { ActiveAgent, AutonomyLevel, AgentAction, AgentSettings } from './types';
 import { activeAgents as initialAgents } from './data';
 
 const STORAGE_KEY = 'crm-active-agents';
@@ -28,10 +28,12 @@ function persistAgents(agents: ActiveAgent[]) {
 type ActiveAgentsContextValue = {
   agents: ActiveAgent[];
   getAgent: (agentId: string) => ActiveAgent | undefined;
+  activateAgent: (agentId: string, autonomy: AutonomyLevel) => void;
   approveAction: (agentId: string, actionId: string) => void;
   dismissAction: (agentId: string, actionId: string) => void;
   togglePause: (agentId: string) => void;
   setAutonomy: (agentId: string, level: AutonomyLevel) => void;
+  updateSetting: (agentId: string, key: string, value: string | number | boolean) => void;
 };
 
 const ActiveAgentsContext = createContext<ActiveAgentsContextValue | null>(null);
@@ -55,6 +57,25 @@ export function ActiveAgentsProvider({ children }: { children: React.ReactNode }
   const getAgent = useCallback(
     (agentId: string) => agents.find((a) => a.agentId === agentId),
     [agents],
+  );
+
+  const activateAgent = useCallback(
+    (agentId: string, autonomy: AutonomyLevel) => {
+      update((prev) => {
+        // Don't add duplicates
+        if (prev.some((a) => a.agentId === agentId)) return prev;
+        const newAgent: ActiveAgent = {
+          agentId,
+          autonomy,
+          activatedAt: new Date().toISOString().split('T')[0]!,
+          paused: false,
+          outcomes: {},
+          recentActions: [],
+        };
+        return [...prev, newAgent];
+      });
+    },
+    [update],
   );
 
   const updateAction = useCallback(
@@ -103,9 +124,22 @@ export function ActiveAgentsProvider({ children }: { children: React.ReactNode }
     [update],
   );
 
+  const updateSetting = useCallback(
+    (agentId: string, key: string, value: string | number | boolean) => {
+      update((prev) =>
+        prev.map((a) =>
+          a.agentId === agentId
+            ? { ...a, settings: { ...a.settings, [key]: value } }
+            : a,
+        ),
+      );
+    },
+    [update],
+  );
+
   const value = useMemo<ActiveAgentsContextValue>(
-    () => ({ agents, getAgent, approveAction, dismissAction, togglePause, setAutonomy }),
-    [agents, getAgent, approveAction, dismissAction, togglePause, setAutonomy],
+    () => ({ agents, getAgent, activateAgent, approveAction, dismissAction, togglePause, setAutonomy, updateSetting }),
+    [agents, getAgent, activateAgent, approveAction, dismissAction, togglePause, setAutonomy, updateSetting],
   );
 
   return <ActiveAgentsContext value={value}>{children}</ActiveAgentsContext>;

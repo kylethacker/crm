@@ -1,6 +1,8 @@
 import { ToolLoopAgent, stepCountIs } from 'ai';
 import { getModel } from './gateway';
 import { tools } from './tools';
+import type { AgentDefinition, AgentSettings } from '@/lib/marketplace/types';
+import { buildAgentSystemPrompt } from '@/lib/marketplace/settings';
 
 /**
  * AI SDK v6 ToolLoopAgent configurations.
@@ -87,3 +89,44 @@ export const AGENT_DISPLAY: Record<AgentName, { label: string }> = {
   operator: { label: 'Operator' },
   advisor: { label: 'Advisor' },
 };
+
+// ── Marketplace agent factory ────────────────────────────────────────────────
+
+/** Filter the full tool set to only the keys allowed by the agent definition. */
+function filterTools(allowedKeys: string[]) {
+  const allowed = new Set(allowedKeys);
+  const filtered: Record<string, (typeof tools)[keyof typeof tools]> = {};
+  for (const [key, value] of Object.entries(tools)) {
+    if (allowed.has(key)) {
+      filtered[key] = value;
+    }
+  }
+  return filtered;
+}
+
+/**
+ * Create a ToolLoopAgent for a marketplace agent definition.
+ * Uses the agent's own system prompt (with settings interpolated)
+ * and only exposes the tools listed in the definition.
+ */
+export function createMarketplaceAgent(
+  def: AgentDefinition,
+  settingsOverrides?: AgentSettings,
+) {
+  let prompt = buildAgentSystemPrompt(def, settingsOverrides);
+
+  // Append guardrail instructions
+  if (def.guardrails?.length) {
+    const lines = def.guardrails.map(
+      (g) => `- \`${g.tool}\`: ${g.reason}`,
+    );
+    prompt += `\n\n## Guardrails — These tools ALWAYS require approval\n${lines.join('\n')}`;
+  }
+
+  return new ToolLoopAgent({
+    model: getModel('claude-sonnet'),
+    instructions: prompt,
+    tools: filterTools(def.tools),
+    stopWhen: stepCountIs(8),
+  });
+}

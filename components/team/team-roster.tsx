@@ -1,9 +1,10 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import type { AgentDefinition, ActiveAgent, AutonomyLevel } from '@/lib/marketplace/types';
-import { buildHirePrompt } from '@/lib/marketplace/data';
+import { agentDefinitions, buildHirePrompt } from '@/lib/marketplace/data';
+import { useActiveAgents } from '@/lib/marketplace/active-agents-context';
 import { useChatHistory } from '@/lib/chat/chat-history-context';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -23,22 +24,34 @@ import {
   DialogClose,
 } from '@/components/ui/dialog';
 
-// ── Props ────────────────────────────────────────────────────────────────────
-
-type TeamRosterProps = {
-  hired: Array<{ active: ActiveAgent; def: AgentDefinition }>;
-  available: AgentDefinition[];
-  pendingCount: number;
-};
-
 // ── Component ────────────────────────────────────────────────────────────────
 
-export function TeamRoster({ hired, available, pendingCount }: TeamRosterProps) {
+export function TeamRoster() {
   const router = useRouter();
   const { createSession } = useChatHistory();
+  const { agents: activeAgentList, activateAgent } = useActiveAgents();
   const [dialogOpen, setDialogOpen] = useState(false);
   // Keep a ref to the last-selected agent so content persists through the close animation
   const lastAgentRef = useRef<AgentDefinition | null>(null);
+
+  // Derive hired / available from the context so changes are reactive
+  const { hired, available, pendingCount } = useMemo(() => {
+    const activeIds = new Set(activeAgentList.map((a) => a.agentId));
+    const hiredList: Array<{ active: ActiveAgent; def: AgentDefinition }> = [];
+    const availableList: AgentDefinition[] = [];
+    for (const def of agentDefinitions) {
+      const active = activeAgentList.find((a) => a.agentId === def.id);
+      if (active) {
+        hiredList.push({ active, def });
+      } else {
+        availableList.push(def);
+      }
+    }
+    const pending = activeAgentList.flatMap((a) =>
+      a.recentActions.filter((act) => act.status === 'proposed'),
+    ).length;
+    return { hired: hiredList, available: availableList, pendingCount: pending };
+  }, [activeAgentList]);
 
   const openAgentDialog = (def: AgentDefinition) => {
     lastAgentRef.current = def;
@@ -62,7 +75,7 @@ export function TeamRoster({ hired, available, pendingCount }: TeamRosterProps) 
         <div className="col-span-full flex items-start justify-between gap-4">
           <div>
             <h1 className="text-2xl font-semibold text-neutral-900 dark:text-neutral-100">
-              Your Team
+              Your Agents
             </h1>
             <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
               {hired.length > 0
@@ -185,7 +198,7 @@ export function TeamRoster({ hired, available, pendingCount }: TeamRosterProps) 
         {available.length > 0 && (
           <div className="col-span-full mt-8 mb-1">
             <h2 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
-              Add to Your Team
+              Add an Agent
             </h2>
             <p className="mt-0.5 text-sm text-neutral-500 dark:text-neutral-400">
               Each agent solves one problem, completely.
@@ -234,8 +247,9 @@ export function TeamRoster({ hired, available, pendingCount }: TeamRosterProps) 
         agent={lastAgentRef.current}
         onClose={closeAgentDialog}
         onHire={(agent) => {
+          activateAgent(agent.id, agent.defaultAutonomy);
           closeAgentDialog();
-          openChat(buildHirePrompt(agent));
+          router.push(`/team/${agent.id}?onboard=1`);
         }}
       />
     </div>
@@ -347,7 +361,7 @@ function AgentDetailDialog({
                 size="lg"
                 onClick={() => onHire(agent)}
               >
-                {agent.price === 0 ? `Add ${agent.name} to Your Team` : `Hire ${agent.name} — $${agent.price}/mo`}
+                {agent.price === 0 ? `Add ${agent.name}` : `Hire ${agent.name} — $${agent.price}/mo`}
               </Button>
               <DialogClose className="mt-2.5 block w-full cursor-pointer text-center text-xs text-neutral-400 transition-colors hover:text-neutral-600 dark:text-neutral-500 dark:hover:text-neutral-300">
                 Not now

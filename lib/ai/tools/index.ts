@@ -24,6 +24,7 @@ import { createQuoteTool } from './create-quote';
 import { sendReviewRequestTool } from './send-review-request';
 import { escalateToOwnerTool } from './escalate-to-owner';
 import { logAgentActionTool } from './log-agent-action';
+import { createBlogPostTool } from './create-blog-post';
 
 /**
  * All available tools, keyed by the name the model sees.
@@ -72,6 +73,9 @@ export const tools = {
   sendReviewRequest: sendReviewRequestTool,
   escalateToOwner: escalateToOwnerTool,
   logAgentAction: logAgentActionTool,
+
+  // --- Content ---
+  createBlogPost: createBlogPostTool,
 };
 
 export type AppTools = typeof tools;
