@@ -14,7 +14,10 @@ type ViewsContextValue = {
 const ViewsContext = createContext<ViewsContextValue | null>(null);
 
 // Simple external store so all consumers stay in sync after mutations.
+// Cache the snapshot so useSyncExternalStore gets a stable reference.
 let listeners: Array<() => void> = [];
+let cachedSnapshot: TableView[] | null = null;
+
 function subscribe(cb: () => void) {
   listeners.push(cb);
   return () => {
@@ -22,13 +25,19 @@ function subscribe(cb: () => void) {
   };
 }
 function notify() {
+  cachedSnapshot = null; // invalidate cache
   listeners.forEach((l) => l());
 }
-function getSnapshot() {
-  return getTableViews();
+function getSnapshot(): TableView[] {
+  if (cachedSnapshot === null) {
+    cachedSnapshot = getTableViews();
+  }
+  return cachedSnapshot;
 }
+
+const emptyViews: TableView[] = [];
 function getServerSnapshot(): TableView[] {
-  return [];
+  return emptyViews;
 }
 
 export function ViewsProvider({ children }: { children: React.ReactNode }) {
