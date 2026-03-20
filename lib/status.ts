@@ -15,13 +15,6 @@ export const ACTIVITY_STATUS_INDICATOR: Record<AgentActivityStatus, { color: str
   failed: { color: 'bg-neutral-500', label: 'Failed' },
 };
 
-export const ACTIVITY_STATUS_ICON: Record<AgentActivityStatus, string> = {
-  completed: '✓',
-  running: '↻',
-  'needs-approval': '⏸',
-  failed: '✕',
-};
-
 export const CONTACT_STATUS_COLOR: Record<ContactStatus, string> = {
   customer: 'bg-neutral-900 dark:bg-neutral-100',
   lead: 'bg-neutral-500',

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import type { AgentDefinition, ActiveAgent, AutonomyLevel } from '@/lib/marketplace/types';
 import { agentDefinitions, buildHirePrompt } from '@/lib/marketplace/data';
 import { useActiveAgents } from '@/lib/marketplace/active-agents-context';
+import { MarketplaceAgentIcon } from '@/components/marketplace/agent-icon';
 import { useChatHistory } from '@/lib/chat/chat-history-context';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -132,8 +133,8 @@ export function TeamRoster() {
               )}
             >
               <div className="flex items-start gap-3">
-                <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-white text-lg shadow-[0_1px_2px_rgba(0,0,0,0.06)] dark:bg-neutral-800 dark:shadow-none">
-                  {def.icon}
+                <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-white shadow-[0_1px_2px_rgba(0,0,0,0.06)] dark:bg-neutral-800 dark:shadow-none">
+                  <MarketplaceAgentIcon agentId={def.id} size="md" />
                 </span>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
@@ -215,8 +216,8 @@ export function TeamRoster() {
             className="group flex h-full cursor-pointer flex-col rounded-2xl bg-black/3 p-5 text-left transition-colors hover:bg-black/5 dark:bg-white/4 dark:hover:bg-white/6"
           >
             <div className="flex items-start gap-3">
-              <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-white text-xl shadow-[0_1px_2px_rgba(0,0,0,0.06)] dark:bg-neutral-800 dark:shadow-none">
-                {def.icon}
+              <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-white shadow-[0_1px_2px_rgba(0,0,0,0.06)] dark:bg-neutral-800 dark:shadow-none">
+                <MarketplaceAgentIcon agentId={def.id} size="lg" />
               </span>
               <div className="min-w-0 flex-1">
                 <div className="flex items-center justify-between gap-3">
@@ -278,8 +279,8 @@ function AgentDetailDialog({
         <DialogPopup className="flex max-w-lg flex-col gap-0 p-0">
             {/* ── Hero ── */}
             <div className="flex items-center gap-4 border-b border-neutral-100 px-6 pt-6 pb-5 dark:border-neutral-800">
-              <span className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-neutral-100 text-3xl dark:bg-neutral-800">
-                {agent.icon}
+              <span className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-neutral-100 dark:bg-neutral-800">
+                <MarketplaceAgentIcon agentId={agent.id} size="xl" />
               </span>
               <div className="min-w-0 flex-1">
                 <DialogTitle className="text-lg">

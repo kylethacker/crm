@@ -56,7 +56,6 @@ export type AgentDefinition = {
   tools: string[];
   /** Default autonomy level for new activations */
   defaultAutonomy: AutonomyLevel;
-  icon: string;
   /** Monthly price in USD (0 = free) */
   price: number;
   /** What you get — plain bullet points */

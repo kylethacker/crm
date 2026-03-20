@@ -1,8 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import type { AgentDefinition, ActiveAgent } from '@/lib/marketplace/types';
+import type { ActiveAgent } from '@/lib/marketplace/types';
 import { getAgentDef, formatTopOutcome } from '@/lib/marketplace/data';
+import { MarketplaceAgentIcon } from '@/components/marketplace/agent-icon';
 
 type TeamCardProps = {
   activeAgents: ActiveAgent[];
@@ -28,7 +29,7 @@ export function TeamCard({ activeAgents, availableCount, pendingCount }: TeamCar
           const outcome = formatTopOutcome(a.outcomes);
           return (
             <div key={a.agentId} className="flex items-center gap-2.5">
-              <span className="text-sm">{def.icon}</span>
+              <MarketplaceAgentIcon agentId={a.agentId} size="sm" />
               <span className="min-w-0 flex-1 truncate text-sm font-medium text-neutral-900 dark:text-neutral-100">
                 {def.name}
               </span>

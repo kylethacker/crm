@@ -20,15 +20,15 @@ export function BriefingCards({ briefing }: { briefing: DailyBriefing }) {
   return (
     <>
       <PromptCard
-        title="Unread Messages"
+        title="Customers waiting"
         labels={briefing.urgentItems.map((i) => i.label)}
         emptyText="All caught up"
         cta="Respond to all"
         prompt={buildQueuePrompt({
-          header: `I have ${briefing.urgentItems.length} unread message${briefing.urgentItems.length !== 1 ? 's' : ''} to respond to:`,
+          header: `I have ${briefing.urgentItems.length} customer conversation${briefing.urgentItems.length !== 1 ? 's' : ''} waiting for a reply:`,
           items: briefing.urgentItems.map((i) => ({ label: i.label, detail: i.detail })),
           steps: [
-            'Work through these one at a time. For each message:',
+            'Work through these one at a time. For each customer:',
             '1. Look up the contact and show me the context',
             '2. Draft a response using the draftMessage tool',
             '3. Stop and wait for my response before moving to the next one',

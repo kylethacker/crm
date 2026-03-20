@@ -23,7 +23,6 @@ export const agentDefinitions: AgentDefinition[] = [
     ],
     tools: ['draftMessage', 'sendMessage', 'createBooking', 'getContactSummary', 'getContacts', 'getCalendarSlots', 'getBusinessConfig', 'logAgentAction', 'escalateToOwner'],
     defaultAutonomy: 'draft-approve',
-    icon: '⚡',
     price: 29,
     expectedOutcome: '3x faster lead response on average',
     highlights: [
@@ -66,7 +65,6 @@ export const agentDefinitions: AgentDefinition[] = [
     ],
     tools: ['draftMessage', 'sendMessage', 'getContactSummary', 'getContacts', 'getQuotes', 'getInvoices', 'createQuote', 'createInvoice', 'getBusinessConfig', 'logAgentAction', 'escalateToOwner'],
     defaultAutonomy: 'draft-approve',
-    icon: '🤝',
     price: 39,
     expectedOutcome: 'Recovers $2,300/mo in forgotten deals',
     highlights: [
@@ -108,7 +106,6 @@ export const agentDefinitions: AgentDefinition[] = [
     ],
     tools: ['draftMessage', 'sendMessage', 'getContactSummary', 'getReviewStatus', 'sendReviewRequest', 'getBusinessConfig', 'logAgentAction', 'escalateToOwner'],
     defaultAutonomy: 'auto',
-    icon: '⭐',
     price: 19,
     expectedOutcome: '4-6 new five-star reviews per month',
     highlights: [
@@ -154,7 +151,6 @@ export const agentDefinitions: AgentDefinition[] = [
     ],
     tools: ['draftMessage', 'sendMessage', 'getContactSummary', 'getContacts', 'getCalendarSlots', 'createBooking', 'getBusinessConfig', 'logAgentAction', 'escalateToOwner'],
     defaultAutonomy: 'draft-approve',
-    icon: '📅',
     price: 24,
     expectedOutcome: 'Fills 8-12 empty slots per month',
     highlights: [
@@ -194,7 +190,6 @@ export const agentDefinitions: AgentDefinition[] = [
     ],
     tools: ['draftMessage', 'sendMessage', 'getContactSummary', 'getInvoices', 'createInvoice', 'sendInvoice', 'getBusinessConfig', 'logAgentAction', 'escalateToOwner'],
     defaultAutonomy: 'draft-approve',
-    icon: '💰',
     price: 29,
     expectedOutcome: 'Cuts average days-to-payment by 40%',
     highlights: [
@@ -240,7 +235,6 @@ export const agentDefinitions: AgentDefinition[] = [
     ],
     tools: ['draftMessage', 'sendMessage', 'getContactSummary', 'getContacts', 'getWeekSummary', 'addNote', 'getBusinessConfig', 'logAgentAction', 'escalateToOwner'],
     defaultAutonomy: 'draft-approve',
-    icon: '🛡️',
     price: 34,
     expectedOutcome: 'Saves 2-3 at-risk customers per month',
     highlights: [
@@ -280,7 +274,6 @@ export const agentDefinitions: AgentDefinition[] = [
     ],
     tools: ['getContactSummary', 'getContacts', 'getCalendarSlots', 'getInvoices', 'getQuotes', 'getWeekSummary', 'getBusinessConfig', 'logAgentAction'],
     defaultAutonomy: 'auto',
-    icon: '📋',
     price: 0,
     expectedOutcome: 'Saves 2+ hours of planning every week',
     highlights: [
@@ -320,7 +313,6 @@ export const agentDefinitions: AgentDefinition[] = [
     ],
     tools: ['createBlogPost', 'getWeekSummary', 'getContacts', 'getBusinessConfig', 'getReviewStatus', 'logAgentAction', 'escalateToOwner'],
     defaultAutonomy: 'draft-approve',
-    icon: '✍️',
     price: 24,
     expectedOutcome: '4 blog posts per month, written for you',
     highlights: [

@@ -115,7 +115,7 @@ export function MessagesPage({ conversations }: MessagesPageProps) {
         </div>
       ) : (
         <div className="flex min-w-0 flex-1 items-center justify-center">
-          <p className="text-sm text-neutral-400">Select a conversation</p>
+          <p className="text-sm text-neutral-400">Select a customer</p>
         </div>
       )}
     </div>

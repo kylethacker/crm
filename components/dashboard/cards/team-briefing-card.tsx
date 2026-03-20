@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import type { TeamReport, TeamGap } from '@/lib/dashboard/briefing';
 import { useChatHistory } from '@/lib/chat/chat-history-context';
+import { MarketplaceAgentIcon } from '@/components/marketplace/agent-icon';
 
 type TeamBriefingCardProps = {
   reports: TeamReport[];
@@ -51,7 +52,7 @@ export function TeamBriefingCard({ reports, gaps, pendingApprovals }: TeamBriefi
             <div className="mt-2.5 flex flex-col gap-1.5">
               {reports.map((r) => (
                 <div key={r.agentName} className="flex items-center gap-2">
-                  <span className="text-sm">{r.icon}</span>
+                  <MarketplaceAgentIcon agentId={r.agentId} size="sm" />
                   <span className="text-sm text-neutral-900 dark:text-neutral-100">
                     <span className="font-medium">{r.agentName}</span>
                     <span className="text-neutral-500 dark:text-neutral-400"> — {r.outcome}</span>
