@@ -21,15 +21,14 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: 'AI CRM',
-    template: '%s | AI CRM',
+    default: 'Dashboard',
   },
   description: 'Your AI-powered CRM coworker for small businesses.',
 };
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
+    { media: '(prefers-color-scheme: light)', color: '#f7f8f9' },
     { media: '(prefers-color-scheme: dark)', color: '#0a0a0a' },
   ],
 };
@@ -49,12 +48,12 @@ export default function RootLayout({
        * `relative` is required for iOS 26+ Safari viewport coverage.
        */}
       <body
-        className={`${geistSans.variable} ${geistMono.variable} relative isolate bg-white text-neutral-950 antialiased dark:bg-neutral-950 dark:text-neutral-50`}
+        className={`${geistSans.variable} ${geistMono.variable} relative isolate bg-app-canvas text-neutral-950 antialiased dark:bg-neutral-950 dark:text-neutral-50`}
       >
         <Providers>
           <div className="flex h-dvh">
             <AppSidebar />
-            <main className="min-w-0 flex-1 overflow-y-auto">{children}</main>
+            <main className="h-full min-w-0 flex-1 overflow-y-auto bg-app-canvas dark:bg-neutral-950">{children}</main>
           </div>
           <DevResetButton />
         </Providers>

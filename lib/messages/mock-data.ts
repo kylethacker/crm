@@ -94,6 +94,7 @@ const messagesByContact: Record<string, TextMessage[]> = {
 const bookingsByContact: Record<string, Booking[]> = {
   '1': [
     { id: 'b1', contactId: '1', title: 'Quarterly Business Review', date: '2026-03-20', time: '10:00 AM', duration: 60, status: 'upcoming', notes: 'Discuss Q2 renewal and seat expansion' },
+    { id: 'b15', contactId: '1', title: 'API v2 Launch Sync', date: '2026-03-17', time: '9:00 AM', duration: 45, status: 'upcoming', notes: 'Walk through new API endpoints' },
     { id: 'b2', contactId: '1', title: 'Onboarding - Marketing Team', date: '2026-02-10', time: '2:00 PM', duration: 45, status: 'completed', amount: 0 },
     { id: 'b3', contactId: '1', title: 'Enterprise Plan Demo', date: '2025-06-20', time: '11:00 AM', duration: 30, status: 'completed', amount: 0 },
     { id: 'b4', contactId: '1', title: 'Implementation Kickoff', date: '2025-07-01', time: '9:00 AM', duration: 90, status: 'completed', amount: 4500, notes: 'Enterprise plan signed' },
@@ -101,13 +102,18 @@ const bookingsByContact: Record<string, Booking[]> = {
   ],
   '2': [
     { id: 'b6', contactId: '2', title: 'Product Demo', date: '2026-03-11', time: '3:00 PM', duration: 45, status: 'upcoming', notes: 'Pro plan demo for team of 12' },
+    { id: 'b16', contactId: '2', title: 'Pro Plan Follow-up', date: '2026-03-18', time: '2:00 PM', duration: 30, status: 'upcoming', notes: 'Discuss pricing and next steps' },
+    { id: 'b17', contactId: '2', title: 'Contract Review', date: '2026-03-21', time: '11:00 AM', duration: 45, status: 'upcoming' },
     { id: 'b7', contactId: '2', title: 'Discovery Call', date: '2026-02-25', time: '10:00 AM', duration: 30, status: 'completed', amount: 0 },
   ],
   '3': [
     { id: 'b8', contactId: '3', title: 'Integration Walkthrough', date: '2026-03-12', time: '2:00 PM', duration: 45, status: 'upcoming', notes: 'Walk through Zapier, API, and webhook options' },
+    { id: 'b18', contactId: '3', title: 'Technical Deep Dive', date: '2026-03-19', time: '3:00 PM', duration: 60, status: 'upcoming', notes: 'Review webhook payload formats' },
   ],
   '4': [
     { id: 'b9', contactId: '4', title: 'Pro Plan Upgrade Call', date: '2026-03-14', time: '11:00 AM', duration: 30, status: 'upcoming', amount: 0 },
+    { id: 'b19', contactId: '4', title: 'Team Training Session', date: '2026-03-17', time: '1:00 PM', duration: 60, status: 'upcoming', notes: 'Onboard 3 new team members' },
+    { id: 'b20', contactId: '4', title: 'March Check-in', date: '2026-03-20', time: '2:00 PM', duration: 30, status: 'upcoming' },
     { id: 'b10', contactId: '4', title: 'Starter Plan Onboarding', date: '2025-11-15', time: '1:00 PM', duration: 45, status: 'completed', amount: 1200, notes: 'Starter plan signed' },
     { id: 'b11', contactId: '4', title: 'Follow-up Training', date: '2025-12-01', time: '10:00 AM', duration: 30, status: 'completed', amount: 0 },
     { id: 'b12', contactId: '4', title: 'Monthly Check-in', date: '2026-01-15', time: '2:00 PM', duration: 30, status: 'no-show' },

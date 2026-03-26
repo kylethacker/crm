@@ -18,7 +18,7 @@ export function PromptCard({ title, labels, cta, emptyText, prompt }: PromptCard
   if (labels.length === 0) {
     if (!emptyText) return null;
     return (
-      <div className="flex min-h-[120px] w-full flex-col rounded-xl border border-neutral-200 bg-white px-5 py-4 dark:border-neutral-800 dark:bg-neutral-900">
+      <div className="flex min-h-[120px] w-full flex-col rounded-lg border border-neutral-200/70 bg-app-surface px-5 py-4 dark:border-neutral-800 dark:bg-neutral-900">
         <h3 className="text-xs font-medium text-neutral-500 dark:text-neutral-400">
           {title}
         </h3>
@@ -38,7 +38,7 @@ export function PromptCard({ title, labels, cta, emptyText, prompt }: PromptCard
     <button
       type="button"
       onClick={handleClick}
-      className="flex min-h-[120px] w-full cursor-pointer flex-col rounded-xl border border-neutral-200 bg-white px-5 py-4 text-left transition-colors hover:bg-neutral-50 dark:border-neutral-800 dark:bg-neutral-900 dark:hover:bg-neutral-800/70"
+      className="flex min-h-[120px] w-full cursor-pointer flex-col rounded-lg border border-neutral-200/70 bg-app-surface px-5 py-4 text-left transition-colors hover:bg-neutral-50/80 dark:border-neutral-800 dark:bg-neutral-900 dark:hover:bg-neutral-800/70"
     >
       <h3 className="text-xs font-medium text-neutral-500 dark:text-neutral-400">
         {title}

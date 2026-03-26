@@ -47,7 +47,7 @@ export const getContactsTool = tool({
         upcomingBookingCount,
         createdAt: contact.createdAt,
         lastMessageSnippet: lastMessage
-          ? `${lastMessage.direction === 'inbound' ? '←' : '→'} ${lastMessage.text.slice(0, 80)}`
+          ? `${lastMessage.direction === 'inbound' ? 'In:' : 'Out:'} ${lastMessage.text.slice(0, 80)}`
           : null,
       };
     });

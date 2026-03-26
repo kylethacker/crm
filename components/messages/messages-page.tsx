@@ -24,7 +24,7 @@ export function MessagesPage({ conversations }: MessagesPageProps) {
   const activeConversation = conversations.find((c) => c.contact.id === activeId);
 
   return (
-    <div className="flex h-full">
+    <div className="flex h-full bg-app-canvas dark:bg-neutral-950">
       {/* Conversation list - left panel */}
       <div className="w-80 shrink-0">
         <ConversationList
@@ -39,39 +39,45 @@ export function MessagesPage({ conversations }: MessagesPageProps) {
 
       {/* Center content area */}
       {activeConversation ? (
-        <div className="flex min-w-0 flex-1 flex-col">
-          {/* Header with tabs */}
-          <div className="flex items-center justify-between border-b border-neutral-200 px-4 py-3 dark:border-neutral-800">
-            <div className="flex items-center gap-3">
-              <div className="flex size-8 items-center justify-center rounded-full bg-neutral-200 dark:bg-neutral-700">
-                <span className="text-xs font-medium text-neutral-600 dark:text-neutral-300">
-                  {activeConversation.contact.name.split(' ').map((n) => n[0]).join('').slice(0, 2)}
-                </span>
-              </div>
-              <div>
-                <h3 className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">
-                  {activeConversation.contact.name}
-                </h3>
-                <p className="text-xs text-neutral-500">{activeConversation.contact.phone}</p>
+        <div className="flex min-w-0 flex-1 flex-col bg-app-surface dark:bg-neutral-950">
+          {/* Header + Linear-style tabs */}
+          <div className="shrink-0 border-b border-neutral-200/70 dark:border-neutral-800">
+            <div className="flex items-center justify-between gap-3 px-4 py-3">
+              <div className="flex min-w-0 items-center gap-3">
+                <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-neutral-100 ring-1 ring-neutral-200/80 dark:bg-neutral-800 dark:ring-neutral-700">
+                  <span className="text-xs font-medium text-neutral-600 dark:text-neutral-300">
+                    {activeConversation.contact.name.split(' ').map((n) => n[0]).join('').slice(0, 2)}
+                  </span>
+                </div>
+                <div className="min-w-0">
+                  <h3 className="truncate text-sm font-semibold tracking-tight text-neutral-900 dark:text-neutral-100">
+                    {activeConversation.contact.name}
+                  </h3>
+                  <p className="truncate text-xs text-neutral-500 dark:text-neutral-400">{activeConversation.contact.phone}</p>
+                </div>
               </div>
             </div>
-
-            <div className="flex rounded-lg border border-neutral-200 dark:border-neutral-700" role="tablist">
-              {(['overview', 'conversation'] as const).map((t) => (
+            <div className="flex gap-0 px-4" role="tablist" aria-label="Customer view">
+              {(
+                [
+                  { id: 'overview' as const, label: 'Overview' },
+                  { id: 'conversation' as const, label: 'Messages' },
+                ] as const
+              ).map(({ id, label }) => (
                 <button
-                  key={t}
+                  key={id}
                   type="button"
                   role="tab"
-                  aria-selected={tab === t}
-                  onClick={() => setTab(t)}
+                  aria-selected={tab === id}
+                  onClick={() => setTab(id)}
                   className={cn(
-                    'cursor-pointer px-3.5 py-1.5 text-xs font-medium capitalize transition-colors first:rounded-l-[7px] last:rounded-r-[7px]',
-                    tab === t
-                      ? 'bg-neutral-900 text-white dark:bg-white dark:text-neutral-900'
-                      : 'text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300',
+                    '-mb-px cursor-pointer border-b-2 px-3 pb-2.5 pt-0.5 text-xs font-medium transition-colors',
+                    tab === id
+                      ? 'border-neutral-900 text-neutral-900 dark:border-neutral-100 dark:text-neutral-100'
+                      : 'border-transparent text-neutral-500 hover:text-neutral-800 dark:text-neutral-400 dark:hover:text-neutral-200',
                   )}
                 >
-                  {t}
+                  {label}
                 </button>
               ))}
             </div>
@@ -115,7 +121,7 @@ export function MessagesPage({ conversations }: MessagesPageProps) {
         </div>
       ) : (
         <div className="flex min-w-0 flex-1 items-center justify-center">
-          <p className="text-sm text-neutral-400">Select a conversation</p>
+          <p className="text-sm text-neutral-400">Select a customer</p>
         </div>
       )}
     </div>

@@ -12,18 +12,18 @@ export function MessagesCard({ total, inbound, outbound }: MessagesCardProps) {
   const outPct = total > 0 ? 100 - inPct : 0;
 
   const summary = [
-    `${total} total messages`,
+    `${total} total customer messages (SMS)`,
     `- Inbound: ${inbound} (${inPct}%)`,
     `- Outbound: ${outbound} (${outPct}%)`,
   ].join('\n');
 
   return (
     <DashboardCard
-      title="Messages"
+      title="Customers"
       description={`${inbound} inbound · ${outbound} outbound`}
       value={String(total)}
-      cta="View messages"
-      chatContext={{ sourceId: 'messages', cardType: 'messages', title: 'Messages', summary }}
+      cta="View customer messages"
+      chatContext={{ sourceId: 'messages', cardType: 'messages', title: 'Customers', summary }}
     />
   );
 }

@@ -6,7 +6,10 @@ import { TeamBriefingCard } from './cards/team-briefing-card';
 export function DailyBriefingHeader({ greeting }: { greeting: string }) {
   return (
     <div className="col-span-full">
-      <h1 className="mb-1 text-2xl font-semibold text-neutral-900 dark:text-neutral-100">
+      <p className="mb-1 text-[11px] font-medium uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+        Workspace
+      </p>
+      <h1 className="mb-1 text-2xl font-semibold tracking-tight text-neutral-900 dark:text-neutral-100">
         {greeting}
       </h1>
       <p className="text-sm text-neutral-500 dark:text-neutral-400">
@@ -20,15 +23,15 @@ export function BriefingCards({ briefing }: { briefing: DailyBriefing }) {
   return (
     <>
       <PromptCard
-        title="Unread Messages"
+        title="Customers waiting"
         labels={briefing.urgentItems.map((i) => i.label)}
         emptyText="All caught up"
         cta="Respond to all"
         prompt={buildQueuePrompt({
-          header: `I have ${briefing.urgentItems.length} unread message${briefing.urgentItems.length !== 1 ? 's' : ''} to respond to:`,
+          header: `I have ${briefing.urgentItems.length} customer conversation${briefing.urgentItems.length !== 1 ? 's' : ''} waiting for a reply:`,
           items: briefing.urgentItems.map((i) => ({ label: i.label, detail: i.detail })),
           steps: [
-            'Work through these one at a time. For each message:',
+            'Work through these one at a time. For each customer:',
             '1. Look up the contact and show me the context',
             '2. Draft a response using the draftMessage tool',
             '3. Stop and wait for my response before moving to the next one',

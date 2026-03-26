@@ -28,7 +28,7 @@ type DashboardGridProps = {
 export function DashboardGrid({ crmStats, activityStats, reviewStats, pipelineStats, websiteAnalyticsStats, briefing }: DashboardGridProps) {
   return (
     <div className="flex-1 overflow-y-auto">
-      <div className="mx-auto grid max-w-[960px] grid-cols-1 gap-3 px-4 pt-8 pb-64 sm:grid-cols-2">
+      <div className="mx-auto grid max-w-[1040px] grid-cols-1 gap-4 px-5 pt-8 pb-64 sm:grid-cols-2">
         <DailyBriefingHeader greeting={briefing.greeting} />
 
         <BriefingCards briefing={briefing} />

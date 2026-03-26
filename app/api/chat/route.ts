@@ -97,12 +97,24 @@ const marketplaceAgentContextSchema = z.object({
   outcomes: z.record(z.number()),
 }).optional();
 
+const studioContextSchema = z.object({
+  format: z.string(),
+  width: z.number(),
+  height: z.number(),
+  currentDesign: z.object({
+    name: z.string(),
+    background: z.string(),
+    elements: z.array(z.record(z.unknown())),
+  }).optional(),
+}).optional();
+
 const chatRequestSchema = z.object({
   messages: z.array(uiMessageSchema).min(1),
   agent: z.enum(AGENT_NAMES).default('operator'),
   artifactContext: artifactContextSchema,
   contactContext: contactContextSchema,
   marketplaceAgentContext: marketplaceAgentContextSchema,
+  studioContext: studioContextSchema,
   marketplaceAgentId: z.string().optional(),
   agentSettings: z.record(z.union([z.string(), z.number(), z.boolean()])).optional(),
 });
@@ -335,6 +347,23 @@ function buildContactSystemMessage(ctx: z.infer<typeof contactContextSchema>) {
   return lines.join('\n');
 }
 
+function buildStudioSystemMessage(ctx: z.infer<typeof studioContextSchema>): string | null {
+  if (!ctx) return null;
+  const lines = [
+    `## Canvas`,
+    `- Format: ${ctx.format}`,
+    `- Dimensions: ${ctx.width}×${ctx.height} pixels`,
+  ];
+  if (ctx.currentDesign) {
+    lines.push('', '## Current Design State');
+    lines.push(JSON.stringify(ctx.currentDesign, null, 2));
+    lines.push('', 'When the user asks for changes, modify this design and call generateDesign with the full updated spec.');
+  } else {
+    lines.push('', 'The canvas is empty. Create a new design when the user describes what they want.');
+  }
+  return lines.join('\n');
+}
+
 export async function POST(req: Request) {
   try {
     const {
@@ -343,19 +372,22 @@ export async function POST(req: Request) {
       artifactContext,
       contactContext,
       marketplaceAgentContext,
+      studioContext,
       marketplaceAgentId,
       agentSettings,
     } = chatRequestSchema.parse(await req.json());
 
     const systemMessages: typeof messages = [];
 
-    // Always inject business context
-    const businessContext = buildBusinessContext();
-    systemMessages.push({
-      id: 'business-context',
-      role: 'system' as const,
-      parts: [{ type: 'text' as const, text: businessContext }],
-    });
+    // Skip business context for studio agent — it doesn't need CRM data
+    if (agentName !== 'studio') {
+      const businessContext = buildBusinessContext();
+      systemMessages.push({
+        id: 'business-context',
+        role: 'system' as const,
+        parts: [{ type: 'text' as const, text: businessContext }],
+      });
+    }
 
     if (artifactContext) {
       systemMessages.push({
@@ -378,6 +410,14 @@ export async function POST(req: Request) {
         id: 'marketplace-agent-context',
         role: 'system' as const,
         parts: [{ type: 'text' as const, text: buildMarketplaceAgentSystemMessage(marketplaceAgentContext)! }],
+      });
+    }
+
+    if (studioContext) {
+      systemMessages.push({
+        id: 'studio-context',
+        role: 'system' as const,
+        parts: [{ type: 'text' as const, text: buildStudioSystemMessage(studioContext)! }],
       });
     }
 

@@ -28,6 +28,9 @@ export type AgentSettings = Record<string, string | number | boolean>;
 /** Tools that always need approval regardless of autonomy */
 export type AgentGuardrail = { tool: string; reason: string };
 
+/** Which surface(s) the agent belongs to */
+export type AgentCategory = 'operations' | 'discoverability';
+
 /** A concrete thing the agent did or wants to do */
 export type AgentAction = {
   id: string;
@@ -56,7 +59,6 @@ export type AgentDefinition = {
   tools: string[];
   /** Default autonomy level for new activations */
   defaultAutonomy: AutonomyLevel;
-  icon: string;
   /** Monthly price in USD (0 = free) */
   price: number;
   /** What you get — plain bullet points */
@@ -71,6 +73,8 @@ export type AgentDefinition = {
   settings?: AgentSettingDef[];
   /** Tools that always need approval regardless of autonomy */
   guardrails?: AgentGuardrail[];
+  /** Which surface(s) the agent belongs to — defaults to 'operations' */
+  category?: AgentCategory;
 };
 
 export type ActiveAgent = {

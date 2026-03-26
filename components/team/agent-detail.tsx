@@ -16,8 +16,11 @@ import { formatRelativeTime } from '@/lib/format';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { AgentChat } from './agent-chat';
+import { MarketplaceAgentIcon } from '@/components/marketplace/agent-icon';
 
 const AUTONOMY_LEVELS: AutonomyLevel[] = ['suggest', 'draft-approve', 'auto'];
+
+type AgentSidebarTab = 'activity' | 'settings';
 
 const MIN_SIDEBAR_WIDTH = 260;
 const MAX_SIDEBAR_WIDTH = 420;
@@ -31,6 +34,7 @@ export function AgentDetail({ agentDef }: { agentDef: AgentDefinition }) {
   const active = getAgent(agentDef.id);
 
   const [sidebarWidth, setSidebarWidth] = useState(DEFAULT_SIDEBAR_WIDTH);
+  const [sidebarTab, setSidebarTab] = useState<AgentSidebarTab>('activity');
   const isDragging = useRef(false);
   const startX = useRef(0);
   const startWidth = useRef(DEFAULT_SIDEBAR_WIDTH);
@@ -75,7 +79,7 @@ export function AgentDetail({ agentDef }: { agentDef: AgentDefinition }) {
   return (
     <div className="flex h-full">
       {/* ── Main: Chat ── */}
-      <div className="relative flex flex-1 flex-col">
+      <div className="relative flex min-h-0 flex-1 flex-col">
         <button
           type="button"
           onClick={() => router.push('/team')}
@@ -111,8 +115,8 @@ export function AgentDetail({ agentDef }: { agentDef: AgentDefinition }) {
         <div className="px-4 pt-4 pb-16">
           {/* Agent header */}
           <div className="flex items-center gap-3">
-            <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-white text-xl shadow-[0_1px_2px_rgba(0,0,0,0.06)] dark:bg-neutral-800 dark:shadow-none">
-              {agentDef.icon}
+            <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-white shadow-[0_1px_2px_rgba(0,0,0,0.06)] dark:bg-neutral-800 dark:shadow-none">
+              <MarketplaceAgentIcon agentId={agentDef.id} size="md" />
             </span>
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2">
@@ -134,185 +138,242 @@ export function AgentDetail({ agentDef }: { agentDef: AgentDefinition }) {
             </div>
           </div>
 
-          {/* Outcome metrics */}
-          {active && Object.keys(active.outcomes).length > 0 && (
-            <div className="mt-4 flex flex-wrap gap-2">
-              {Object.entries(active.outcomes).map(([key, value]) => (
-                <div
-                  key={key}
-                  className="rounded-lg border border-neutral-200 bg-white px-3 py-2 dark:border-neutral-800 dark:bg-neutral-900"
-                >
-                  <p className="text-sm font-bold text-neutral-900 dark:text-neutral-100">
-                    {formatOutcomeValue(key, value)}
-                  </p>
-                  <p className="text-[11px] text-neutral-500 dark:text-neutral-400">{key}</p>
-                </div>
-              ))}
-              <div className="rounded-lg border border-neutral-200 bg-white px-3 py-2 dark:border-neutral-800 dark:bg-neutral-900">
-                <p className="text-sm font-bold text-neutral-900 dark:text-neutral-100">
-                  {formatRelativeTime(active.activatedAt)}
+          {/* Tabs */}
+          <div
+            className="mt-4 flex rounded-lg bg-neutral-200/50 p-0.5 dark:bg-neutral-800/50"
+            role="tablist"
+            aria-label="Agent sidebar"
+          >
+            {(['activity', 'settings'] as const).map((tab) => (
+              <button
+                key={tab}
+                type="button"
+                role="tab"
+                aria-selected={sidebarTab === tab}
+                onClick={() => setSidebarTab(tab)}
+                className={cn(
+                  'flex-1 cursor-pointer rounded-md py-1.5 text-center text-xs font-medium transition-colors',
+                  sidebarTab === tab
+                    ? 'bg-white text-neutral-900 shadow-sm dark:bg-neutral-900 dark:text-neutral-100'
+                    : 'text-neutral-500 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-300',
+                )}
+              >
+                {tab === 'activity' ? 'Activity' : 'Settings'}
+              </button>
+            ))}
+          </div>
+
+          {/* Activity */}
+          {sidebarTab === 'activity' && (
+            <div className="mt-4 space-y-4" role="tabpanel">
+              {!active && (
+                <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                  Hire this agent from the team page to see outcomes, approvals, and activity here.
                 </p>
-                <p className="text-[11px] text-neutral-500 dark:text-neutral-400">active since</p>
-              </div>
-            </div>
-          )}
+              )}
 
-          {/* Pending actions */}
-          {pendingActions.length > 0 && (
-            <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-3 dark:border-amber-800/40 dark:bg-amber-900/20">
-              <div className="flex items-center gap-2">
-                <h2 className="text-xs font-semibold text-amber-900 dark:text-amber-200">
-                  Needs Approval
-                </h2>
-                <span className="flex size-4 items-center justify-center rounded-full bg-amber-200 text-[9px] font-bold dark:bg-amber-800">
-                  {pendingActions.length}
-                </span>
-              </div>
-              <div className="mt-2 flex flex-col gap-1.5">
-                {pendingActions.map((action) => (
-                  <div
-                    key={action.id}
-                    className="rounded-lg bg-white p-2.5 dark:bg-neutral-900"
-                  >
-                    <p className="text-xs text-neutral-900 dark:text-neutral-100">
-                      {action.description}
-                    </p>
-                    <div className="mt-1.5 flex items-center gap-1.5">
-                      <Button
-                        size="sm"
-                        className="h-6 px-2 text-[11px]"
-                        onClick={() => approveAction(agentDef.id, action.id)}
-                      >
-                        Approve
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-6 px-2 text-[11px]"
-                        onClick={() => dismissAction(agentDef.id, action.id)}
-                      >
-                        Dismiss
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Settings */}
-          {active && (
-            <div className="mt-5">
-              <h2 className="text-xs font-semibold text-neutral-900 dark:text-neutral-100">
-                Settings
-              </h2>
-
-              {/* Autonomy */}
-              <div className="mt-3">
-                <p className="text-[11px] font-medium text-neutral-500 dark:text-neutral-400">Autonomy</p>
-                <div className="mt-1.5 flex flex-col gap-1">
-                  {AUTONOMY_LEVELS.map((level) => (
-                    <button
-                      key={level}
-                      type="button"
-                      onClick={() => setAutonomy(agentDef.id, level)}
-                      className={cn(
-                        'flex cursor-pointer flex-col rounded-lg border px-2.5 py-1.5 text-left transition-colors',
-                        active.autonomy === level
-                          ? 'border-neutral-900 bg-white dark:border-neutral-100 dark:bg-neutral-800/50'
-                          : 'border-neutral-200 hover:bg-white dark:border-neutral-800 dark:hover:bg-neutral-800/30',
-                      )}
+              {active && Object.keys(active.outcomes).length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {Object.entries(active.outcomes).map(([key, value]) => (
+                    <div
+                      key={key}
+                      className="rounded-lg border border-neutral-200 bg-white px-3 py-2 dark:border-neutral-800 dark:bg-neutral-900"
                     >
-                      <span className="text-xs font-medium text-neutral-900 dark:text-neutral-100">
-                        {autonomyLabel[level]}
-                      </span>
-                      <span className="text-[11px] text-neutral-500 dark:text-neutral-400">
-                        {autonomyDescription[level]}
-                      </span>
-                    </button>
+                      <p className="text-sm font-bold text-neutral-900 dark:text-neutral-100">
+                        {formatOutcomeValue(key, value)}
+                      </p>
+                      <p className="text-[11px] text-neutral-500 dark:text-neutral-400">{key}</p>
+                    </div>
                   ))}
-                </div>
-              </div>
-
-              {/* Agent-specific settings */}
-              {agentDef.settings && agentDef.settings.length > 0 && (
-                <div className="mt-4 flex flex-col gap-3">
-                  {agentDef.settings.map((setting) => (
-                    <SidebarSettingControl
-                      key={setting.key}
-                      setting={setting}
-                      value={resolvedSettings[setting.key]!}
-                      onChange={(val) => updateSetting(agentDef.id, setting.key, val)}
-                    />
-                  ))}
+                  <div className="rounded-lg border border-neutral-200 bg-white px-3 py-2 dark:border-neutral-800 dark:bg-neutral-900">
+                    <p className="text-sm font-bold text-neutral-900 dark:text-neutral-100">
+                      {formatRelativeTime(active.activatedAt)}
+                    </p>
+                    <p className="text-[11px] text-neutral-500 dark:text-neutral-400">active since</p>
+                  </div>
                 </div>
               )}
 
-              {/* Pause / Resume */}
-              <div className="mt-4">
-                <button
-                  type="button"
-                  onClick={() => togglePause(agentDef.id)}
-                  className="cursor-pointer rounded-lg border border-neutral-200 px-3 py-1.5 text-xs font-medium text-neutral-600 transition-colors hover:bg-white dark:border-neutral-800 dark:text-neutral-400 dark:hover:bg-neutral-800/30"
-                >
-                  {active.paused ? 'Resume Agent' : 'Pause Agent'}
-                </button>
-              </div>
-
-              {/* Price + Triggers */}
-              <div className="mt-4 text-xs text-neutral-500 dark:text-neutral-400">
-                {agentDef.price === 0 ? 'Free' : `$${agentDef.price}/mo`}
-              </div>
-              {agentDef.triggers.length > 0 && (
-                <div className="mt-3">
-                  <p className="text-[11px] font-medium text-neutral-500 dark:text-neutral-400">Triggers</p>
-                  <div className="mt-1 flex flex-col gap-0.5">
-                    {agentDef.triggers.map((t) => (
-                      <div key={t.description} className="flex items-center gap-1.5">
-                        <span className="size-1 shrink-0 rounded-full bg-neutral-300 dark:bg-neutral-600" />
-                        <span className="text-xs text-neutral-600 dark:text-neutral-400">{t.description}</span>
+              {pendingActions.length > 0 && (
+                <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 dark:border-amber-800/40 dark:bg-amber-900/20">
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-xs font-semibold text-amber-900 dark:text-amber-200">
+                      Needs Approval
+                    </h2>
+                    <span className="flex size-4 items-center justify-center rounded-full bg-amber-200 text-[9px] font-bold dark:bg-amber-800">
+                      {pendingActions.length}
+                    </span>
+                  </div>
+                  <div className="mt-2 flex flex-col gap-1.5">
+                    {pendingActions.map((action) => (
+                      <div
+                        key={action.id}
+                        className="rounded-lg bg-white p-2.5 dark:bg-neutral-900"
+                      >
+                        <p className="text-xs text-neutral-900 dark:text-neutral-100">
+                          {action.description}
+                        </p>
+                        <div className="mt-1.5 flex items-center gap-1.5">
+                          <Button
+                            size="sm"
+                            className="h-6 px-2 text-[11px]"
+                            onClick={() => approveAction(agentDef.id, action.id)}
+                          >
+                            Approve
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-6 px-2 text-[11px]"
+                            onClick={() => dismissAction(agentDef.id, action.id)}
+                          >
+                            Dismiss
+                          </Button>
+                        </div>
                       </div>
                     ))}
                   </div>
                 </div>
               )}
+
+              {active && (
+                <div>
+                  <h2 className="text-xs font-semibold text-neutral-900 dark:text-neutral-100">
+                    Recent Activity
+                  </h2>
+                  {active.recentActions.length > 0 ? (
+                    <div className="mt-2 flex flex-col gap-0">
+                      {active.recentActions.map((action, i) => (
+                        <div key={action.id} className="flex gap-2.5 py-2">
+                          <div className="flex flex-col items-center">
+                            <span className={cn(
+                              'mt-1 size-1.5 shrink-0 rounded-full',
+                              action.status === 'proposed' ? 'bg-amber-400' :
+                              action.status === 'approved' ? 'bg-blue-400' :
+                              action.status === 'executed' ? 'bg-green-400' :
+                              'bg-neutral-300 dark:bg-neutral-600',
+                            )} />
+                            {i < active.recentActions.length - 1 && (
+                              <div className="mt-1 w-px flex-1 bg-neutral-200 dark:bg-neutral-800" />
+                            )}
+                          </div>
+                          <div className="min-w-0 flex-1 pb-0.5">
+                            <p className="text-xs text-neutral-700 dark:text-neutral-300">
+                              {action.description}
+                            </p>
+                            <div className="mt-0.5 flex items-center gap-1.5 text-[11px] text-neutral-400 dark:text-neutral-500">
+                              {action.contactName && <span>{action.contactName}</span>}
+                              {action.contactName && <span>·</span>}
+                              <span>{formatRelativeTime(action.createdAt)}</span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="mt-2 text-xs text-neutral-500 dark:text-neutral-400">
+                      No activity yet.
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
           )}
 
-          {/* Activity feed */}
-          {active && active.recentActions.length > 0 && (
-            <div className="mt-5">
-              <h2 className="text-xs font-semibold text-neutral-900 dark:text-neutral-100">
-                Recent Activity
-              </h2>
-              <div className="mt-2 flex flex-col gap-0">
-                {active.recentActions.map((action, i) => (
-                  <div key={action.id} className="flex gap-2.5 py-2">
-                    <div className="flex flex-col items-center">
-                      <span className={cn(
-                        'mt-1 size-1.5 shrink-0 rounded-full',
-                        action.status === 'proposed' ? 'bg-amber-400' :
-                        action.status === 'approved' ? 'bg-blue-400' :
-                        action.status === 'executed' ? 'bg-green-400' :
-                        'bg-neutral-300 dark:bg-neutral-600',
-                      )} />
-                      {i < active.recentActions.length - 1 && (
-                        <div className="mt-1 w-px flex-1 bg-neutral-200 dark:bg-neutral-800" />
-                      )}
-                    </div>
-                    <div className="min-w-0 flex-1 pb-0.5">
-                      <p className="text-xs text-neutral-700 dark:text-neutral-300">
-                        {action.description}
-                      </p>
-                      <div className="mt-0.5 flex items-center gap-1.5 text-[11px] text-neutral-400 dark:text-neutral-500">
-                        {action.contactName && <span>{action.contactName}</span>}
-                        {action.contactName && <span>·</span>}
-                        <span>{formatRelativeTime(action.createdAt)}</span>
-                      </div>
+          {/* Settings */}
+          {sidebarTab === 'settings' && (
+            <div className="mt-4" role="tabpanel">
+              {active ? (
+                <>
+                  <div className="mt-0">
+                    <p className="text-[11px] font-medium text-neutral-500 dark:text-neutral-400">Autonomy</p>
+                    <div className="mt-1.5 flex flex-col gap-1">
+                      {AUTONOMY_LEVELS.map((level) => (
+                        <button
+                          key={level}
+                          type="button"
+                          onClick={() => setAutonomy(agentDef.id, level)}
+                          className={cn(
+                            'flex cursor-pointer flex-col rounded-lg border px-2.5 py-1.5 text-left transition-colors',
+                            active.autonomy === level
+                              ? 'border-neutral-900 bg-white dark:border-neutral-100 dark:bg-neutral-800/50'
+                              : 'border-neutral-200 hover:bg-white dark:border-neutral-800 dark:hover:bg-neutral-800/30',
+                          )}
+                        >
+                          <span className="text-xs font-medium text-neutral-900 dark:text-neutral-100">
+                            {autonomyLabel[level]}
+                          </span>
+                          <span className="text-[11px] text-neutral-500 dark:text-neutral-400">
+                            {autonomyDescription[level]}
+                          </span>
+                        </button>
+                      ))}
                     </div>
                   </div>
-                ))}
-              </div>
+
+                  {agentDef.settings && agentDef.settings.length > 0 && (
+                    <div className="mt-4 flex flex-col gap-3">
+                      {agentDef.settings.map((setting) => (
+                        <SidebarSettingControl
+                          key={setting.key}
+                          setting={setting}
+                          value={resolvedSettings[setting.key]!}
+                          onChange={(val) => updateSetting(agentDef.id, setting.key, val)}
+                        />
+                      ))}
+                    </div>
+                  )}
+
+                  <div className="mt-4">
+                    <button
+                      type="button"
+                      onClick={() => togglePause(agentDef.id)}
+                      className="cursor-pointer rounded-lg border border-neutral-200 px-3 py-1.5 text-xs font-medium text-neutral-600 transition-colors hover:bg-white dark:border-neutral-800 dark:text-neutral-400 dark:hover:bg-neutral-800/30"
+                    >
+                      {active.paused ? 'Resume Agent' : 'Pause Agent'}
+                    </button>
+                  </div>
+
+                  <div className="mt-4 text-xs text-neutral-500 dark:text-neutral-400">
+                    {agentDef.price === 0 ? 'Free' : `$${agentDef.price}/mo`}
+                  </div>
+                  {agentDef.triggers.length > 0 && (
+                    <div className="mt-3">
+                      <p className="text-[11px] font-medium text-neutral-500 dark:text-neutral-400">Triggers</p>
+                      <div className="mt-1 flex flex-col gap-0.5">
+                        {agentDef.triggers.map((t) => (
+                          <div key={t.description} className="flex items-center gap-1.5">
+                            <span className="size-1 shrink-0 rounded-full bg-neutral-300 dark:bg-neutral-600" />
+                            <span className="text-xs text-neutral-600 dark:text-neutral-400">{t.description}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <>
+                  <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                    Activate this agent from the team roster to change autonomy and options.
+                  </p>
+                  <div className="mt-4 text-xs text-neutral-500 dark:text-neutral-400">
+                    {agentDef.price === 0 ? 'Free' : `$${agentDef.price}/mo`}
+                  </div>
+                  {agentDef.triggers.length > 0 && (
+                    <div className="mt-3">
+                      <p className="text-[11px] font-medium text-neutral-500 dark:text-neutral-400">Triggers</p>
+                      <div className="mt-1 flex flex-col gap-0.5">
+                        {agentDef.triggers.map((t) => (
+                          <div key={t.description} className="flex items-center gap-1.5">
+                            <span className="size-1 shrink-0 rounded-full bg-neutral-300 dark:bg-neutral-600" />
+                            <span className="text-xs text-neutral-600 dark:text-neutral-400">{t.description}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
             </div>
           )}
         </div>

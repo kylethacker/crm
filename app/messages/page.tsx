@@ -2,7 +2,7 @@ import { getConversations } from '@/lib/messages/mock-data';
 import { MessagesPage } from '@/components/messages/messages-page';
 
 export const metadata = {
-  title: 'Messages',
+  title: 'Customers',
 };
 
 export default function Messages() {

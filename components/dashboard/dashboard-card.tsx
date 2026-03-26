@@ -60,7 +60,7 @@ export function DashboardCard(props: DashboardCardProps) {
   if (!('value' in props) || props.value === undefined) {
     const legacyProps = props as LegacyCardProps;
     return (
-      <div className={cn('flex h-full flex-col overflow-hidden rounded-2xl bg-black/3 dark:bg-white/4', className)}>
+      <div className={cn('flex h-full flex-col overflow-hidden rounded-lg border border-neutral-200/70 bg-app-surface dark:border-neutral-800 dark:bg-neutral-900', className)}>
         <div className="flex items-center gap-2 px-6 pt-5 pb-1">
           <div className="flex min-w-0 flex-1 items-baseline gap-1.5">
             {legacyProps.badge}
@@ -82,7 +82,7 @@ export function DashboardCard(props: DashboardCardProps) {
             <button
               type="button"
               onClick={handleChat}
-              className="cursor-pointer rounded-xl bg-white px-3 py-1 text-sm font-medium text-black/55 shadow-[0_4px_4px_rgba(0,0,0,0.05),0_0_0_1px_rgba(0,0,0,0.1)] transition-colors hover:bg-neutral-100 dark:bg-neutral-800 dark:text-white/55 dark:shadow-[0_4px_4px_rgba(0,0,0,0.2),0_0_0_1px_rgba(255,255,255,0.08)] dark:hover:bg-neutral-700"
+              className="cursor-pointer rounded-md border border-neutral-200/80 bg-app-surface px-3 py-1 text-sm font-medium text-neutral-600 transition-colors hover:bg-neutral-50 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700"
             >
               Chat
             </button>
@@ -101,7 +101,7 @@ export function DashboardCard(props: DashboardCardProps) {
       type="button"
       onClick={handleChat}
       className={cn(
-        'flex h-full min-h-[160px] cursor-pointer flex-col rounded-xl border border-neutral-200 bg-white px-5 py-4 text-left transition-colors hover:bg-neutral-50 dark:border-neutral-800 dark:bg-neutral-900 dark:hover:bg-neutral-800/70',
+        'flex h-full min-h-[160px] cursor-pointer flex-col rounded-lg border border-neutral-200/70 bg-app-surface px-5 py-4 text-left transition-colors hover:bg-neutral-50/80 dark:border-neutral-800 dark:bg-neutral-900 dark:hover:bg-neutral-800/70',
         className,
       )}
     >

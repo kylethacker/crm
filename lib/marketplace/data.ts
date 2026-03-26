@@ -23,7 +23,6 @@ export const agentDefinitions: AgentDefinition[] = [
     ],
     tools: ['draftMessage', 'sendMessage', 'createBooking', 'getContactSummary', 'getContacts', 'getCalendarSlots', 'getBusinessConfig', 'logAgentAction', 'escalateToOwner'],
     defaultAutonomy: 'draft-approve',
-    icon: '⚡',
     price: 29,
     expectedOutcome: '3x faster lead response on average',
     highlights: [
@@ -66,7 +65,6 @@ export const agentDefinitions: AgentDefinition[] = [
     ],
     tools: ['draftMessage', 'sendMessage', 'getContactSummary', 'getContacts', 'getQuotes', 'getInvoices', 'createQuote', 'createInvoice', 'getBusinessConfig', 'logAgentAction', 'escalateToOwner'],
     defaultAutonomy: 'draft-approve',
-    icon: '🤝',
     price: 39,
     expectedOutcome: 'Recovers $2,300/mo in forgotten deals',
     highlights: [
@@ -108,7 +106,6 @@ export const agentDefinitions: AgentDefinition[] = [
     ],
     tools: ['draftMessage', 'sendMessage', 'getContactSummary', 'getReviewStatus', 'sendReviewRequest', 'getBusinessConfig', 'logAgentAction', 'escalateToOwner'],
     defaultAutonomy: 'auto',
-    icon: '⭐',
     price: 19,
     expectedOutcome: '4-6 new five-star reviews per month',
     highlights: [
@@ -141,6 +138,7 @@ export const agentDefinitions: AgentDefinition[] = [
         { value: 'both', label: 'Both' },
       ], default: 'google' },
     ],
+    category: 'discoverability',
   },
   {
     id: 'slot-filler',
@@ -154,7 +152,6 @@ export const agentDefinitions: AgentDefinition[] = [
     ],
     tools: ['draftMessage', 'sendMessage', 'getContactSummary', 'getContacts', 'getCalendarSlots', 'createBooking', 'getBusinessConfig', 'logAgentAction', 'escalateToOwner'],
     defaultAutonomy: 'draft-approve',
-    icon: '📅',
     price: 24,
     expectedOutcome: 'Fills 8-12 empty slots per month',
     highlights: [
@@ -194,7 +191,6 @@ export const agentDefinitions: AgentDefinition[] = [
     ],
     tools: ['draftMessage', 'sendMessage', 'getContactSummary', 'getInvoices', 'createInvoice', 'sendInvoice', 'getBusinessConfig', 'logAgentAction', 'escalateToOwner'],
     defaultAutonomy: 'draft-approve',
-    icon: '💰',
     price: 29,
     expectedOutcome: 'Cuts average days-to-payment by 40%',
     highlights: [
@@ -240,7 +236,6 @@ export const agentDefinitions: AgentDefinition[] = [
     ],
     tools: ['draftMessage', 'sendMessage', 'getContactSummary', 'getContacts', 'getWeekSummary', 'addNote', 'getBusinessConfig', 'logAgentAction', 'escalateToOwner'],
     defaultAutonomy: 'draft-approve',
-    icon: '🛡️',
     price: 34,
     expectedOutcome: 'Saves 2-3 at-risk customers per month',
     highlights: [
@@ -280,7 +275,6 @@ export const agentDefinitions: AgentDefinition[] = [
     ],
     tools: ['getContactSummary', 'getContacts', 'getCalendarSlots', 'getInvoices', 'getQuotes', 'getWeekSummary', 'getBusinessConfig', 'logAgentAction'],
     defaultAutonomy: 'auto',
-    icon: '📋',
     price: 0,
     expectedOutcome: 'Saves 2+ hours of planning every week',
     highlights: [
@@ -320,7 +314,6 @@ export const agentDefinitions: AgentDefinition[] = [
     ],
     tools: ['createBlogPost', 'getWeekSummary', 'getContacts', 'getBusinessConfig', 'getReviewStatus', 'logAgentAction', 'escalateToOwner'],
     defaultAutonomy: 'draft-approve',
-    icon: '✍️',
     price: 24,
     expectedOutcome: '4 blog posts per month, written for you',
     highlights: [
@@ -367,6 +360,97 @@ export const agentDefinitions: AgentDefinition[] = [
       { key: 'autoPublish', label: 'Auto-publish', type: 'toggle', default: false },
     ],
     guardrails: [{ tool: 'createBlogPost', reason: 'Blog posts should be reviewed before publishing' }],
+    category: 'discoverability',
+  },
+  {
+    id: 'prompt-rankings',
+    name: 'Prompt Rankings',
+    role: 'Tracks how AI search engines recommend you',
+    problem: 'I have no idea if AI assistants are recommending my business',
+    does: 'Monitors how your business appears when people ask ChatGPT, Gemini, and other AI assistants for recommendations in your area. Tracks your ranking position, mention frequency, and sentiment over time. Alerts you when competitors move ahead.',
+    triggers: [
+      { type: 'schedule', description: 'Every morning at 7am' },
+      { type: 'event', description: 'When a ranking change is detected' },
+    ],
+    tools: ['getBusinessConfig', 'getContacts', 'getReviewStatus', 'logAgentAction', 'escalateToOwner'],
+    defaultAutonomy: 'auto',
+    price: 34,
+    expectedOutcome: 'Full visibility into AI search rankings',
+    highlights: [
+      'Tracks your position across ChatGPT, Gemini, and Perplexity',
+      'Monitors competitor rankings alongside yours',
+      'Alerts you when your ranking changes',
+      'Weekly report with trends and recommendations',
+    ],
+    mode: 'scheduled',
+    systemPrompt: `You are the prompt rankings monitor for this business. Your job is to track how the business appears in AI-generated search results.
+
+## Rules
+- Check rankings for these queries: {{trackedQueries}}
+- Monitor these competitors: {{competitors}}
+- Check every {{checkFrequency}}
+- Alert the owner when ranking drops by 2+ positions
+- Include sentiment analysis — are mentions positive, neutral, or negative?
+- Weekly summary with trends and actionable recommendations`,
+    settings: [
+      { key: 'trackedQueries', label: 'Tracked queries', type: 'text', placeholder: 'e.g. best hair salon near me, top stylist in Austin', default: 'best hair salon near me, top stylist in my area' },
+      { key: 'competitors', label: 'Competitors to track', type: 'text', placeholder: 'e.g. Salon A, Salon B', default: '' },
+      { key: 'checkFrequency', label: 'Check frequency', type: 'select', options: [
+        { value: 'daily', label: 'Daily' },
+        { value: 'twice-weekly', label: 'Twice a week' },
+        { value: 'weekly', label: 'Weekly' },
+      ], default: 'daily' },
+    ],
+    category: 'discoverability',
+  },
+  {
+    id: 'content-creator',
+    name: 'Content Creator',
+    role: 'Creates content that gets you found',
+    problem: 'I know I need more content to show up online but I never have time',
+    does: 'Creates SEO-optimized landing pages, FAQs, and service descriptions that help your business rank in both traditional and AI search. Pulls from real customer questions and business activity to keep content authentic and relevant.',
+    triggers: [
+      { type: 'schedule', description: 'Every {{publishDay}} morning' },
+    ],
+    tools: ['createBlogPost', 'getWeekSummary', 'getContacts', 'getBusinessConfig', 'getReviewStatus', 'logAgentAction', 'escalateToOwner'],
+    defaultAutonomy: 'draft-approve',
+    price: 29,
+    expectedOutcome: '8-12 optimized pages per month',
+    highlights: [
+      'Creates SEO-optimized service pages and FAQs',
+      'Pulls from real customer questions for authentic content',
+      'Optimized for both Google and AI search engines',
+      'You review everything before it goes live',
+    ],
+    mode: 'scheduled',
+    systemPrompt: `You are the content creator for this business. Your job is to create content that improves the business's discoverability in search engines and AI platforms.
+
+## Personality
+- Tone: {{tone}}
+- Write in the business owner's voice — authentic, not corporate
+
+## Rules
+- Content types: {{contentTypes}}
+- Publish day: {{publishDay}}
+- {{autoPublish}} → If true: publish immediately. If false: save as draft for review.
+- Focus on questions real customers ask
+- Include local keywords and service-specific terms
+- Structure content for featured snippets and AI extraction
+- Each piece should target a specific search intent`,
+    settings: [
+      { key: 'tone', label: 'Tone', type: 'select', options: toneOptions, default: 'conversational' },
+      { key: 'contentTypes', label: 'Content types', type: 'text', placeholder: 'e.g. FAQs, service pages, landing pages', default: 'FAQs, service pages, landing pages' },
+      { key: 'publishDay', label: 'Publish day', type: 'select', options: [
+        { value: 'Monday', label: 'Monday' },
+        { value: 'Tuesday', label: 'Tuesday' },
+        { value: 'Wednesday', label: 'Wednesday' },
+        { value: 'Thursday', label: 'Thursday' },
+        { value: 'Friday', label: 'Friday' },
+      ], default: 'Tuesday' },
+      { key: 'autoPublish', label: 'Auto-publish', type: 'toggle', default: false },
+    ],
+    guardrails: [{ tool: 'createBlogPost', reason: 'Content should be reviewed before publishing' }],
+    category: 'discoverability',
   },
 ];
 
@@ -444,6 +528,12 @@ export const availableAgents: AgentDefinition[] = agentDefinitions.filter((a) =>
 export function getPendingApprovals() {
   return activeAgents.flatMap((a) => a.recentActions.filter((act) => act.status === 'proposed'));
 }
+
+// ── Category helpers ─────────────────────────────────────────────────────────
+
+export const discoverabilityAgents: AgentDefinition[] = agentDefinitions.filter(
+  (a) => a.category === 'discoverability',
+);
 
 // ── Shared helpers ───────────────────────────────────────────────────────────
 

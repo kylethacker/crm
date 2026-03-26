@@ -27,6 +27,6 @@ const outcomeFormat: Record<string, 'currency' | 'rating'> = {
 export function formatOutcomeValue(key: string, value: number): string {
   const fmt = outcomeFormat[key];
   if (fmt === 'currency') return formatCurrency(value);
-  if (fmt === 'rating') return `${value}★`;
+  if (fmt === 'rating') return `${value} avg`;
   return value.toLocaleString();
 }

@@ -14,7 +14,7 @@ export type BriefingItem = {
 
 export type TeamReport = {
   agentName: string;
-  icon: string;
+  agentId: string;
   outcome: string;
 };
 
@@ -133,7 +133,7 @@ export function getDailyBriefing(): DailyBriefing {
     if (!def) continue;
     const outcome = formatTopOutcome(a.outcomes);
     if (outcome) {
-      teamReports.push({ agentName: def.name, icon: def.icon, outcome });
+      teamReports.push({ agentName: def.name, agentId: def.id, outcome });
     }
   }
 

@@ -1,11 +1,34 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { CheckIcon, ErrorIcon } from '@/components/icons';
 import { type ToolPart, getToolName } from '@/lib/chat/suggested-responses';
+import { useViews } from '@/lib/views/context';
+import type { TableViewType } from '@/lib/views/types';
 import { ToolRenderer, hasToolRenderer } from './tool-renderers';
 
 export type { ToolPart };
+
+const tableToolToViewType: Record<string, TableViewType> = {
+  getContacts: 'contacts',
+  getInvoices: 'invoices',
+  getQuotes: 'quotes',
+};
+
+const defaultViewNames: Record<TableViewType, string> = {
+  contacts: 'Contacts',
+  invoices: 'Invoices',
+  quotes: 'Quotes',
+};
+
+function buildViewName(viewType: TableViewType, filters: Record<string, unknown>): string {
+  const base = defaultViewNames[viewType];
+  if (filters.status) return `${String(filters.status).charAt(0).toUpperCase() + String(filters.status).slice(1)} ${base}`;
+  if (filters.contactName) return `${base} — ${filters.contactName}`;
+  if (filters.overdueOnly) return `Overdue ${base}`;
+  return base;
+}
 
 export function ToolInvocation({ part }: { part: ToolPart }) {
   const toolName = getToolName(part);
@@ -15,6 +38,8 @@ export function ToolInvocation({ part }: { part: ToolPart }) {
   const output = isDone ? part.output : undefined;
 
   const hasRichRender = isDone && output != null && hasToolRenderer(toolName);
+  const viewType = tableToolToViewType[toolName];
+  const canSaveAsView = isDone && output != null && viewType != null && Array.isArray(output) && output.length > 0;
 
   return (
     <div data-tool-call-id={part.toolCallId} className="overflow-hidden rounded-lg border border-neutral-200 text-xs transition-shadow duration-500 dark:border-neutral-800">
@@ -40,6 +65,52 @@ export function ToolInvocation({ part }: { part: ToolPart }) {
       {isDone && output != null && !hasRichRender && (
         <ToolOutputFallback output={output} />
       )}
+
+      {canSaveAsView && (
+        <SaveAsViewButton
+          viewType={viewType}
+          args={'args' in part ? (part.args as Record<string, unknown>) : {}}
+        />
+      )}
+    </div>
+  );
+}
+
+function SaveAsViewButton({ viewType, args }: { viewType: TableViewType; args: Record<string, unknown> }) {
+  const router = useRouter();
+  const { addView } = useViews();
+  const [saved, setSaved] = useState(false);
+
+  const handleSave = () => {
+    const { limit: _limit, ...filters } = args;
+    const name = buildViewName(viewType, filters);
+    const view = addView(viewType, name, filters);
+    setSaved(true);
+    router.push(`/views/${view.id}`);
+  };
+
+  return (
+    <div className="border-t border-neutral-200 dark:border-neutral-800">
+      <button
+        type="button"
+        disabled={saved}
+        onClick={handleSave}
+        className="flex w-full cursor-pointer items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium text-neutral-500 transition-colors hover:bg-neutral-50 hover:text-neutral-700 disabled:cursor-default disabled:opacity-50 dark:hover:bg-neutral-900 dark:hover:text-neutral-300"
+      >
+        {saved ? (
+          <>
+            <CheckIcon className="text-green-600 dark:text-green-400" />
+            Saved to views
+          </>
+        ) : (
+          <>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M12 2v20M2 12h20" />
+            </svg>
+            Save as view
+          </>
+        )}
+      </button>
     </div>
   );
 }

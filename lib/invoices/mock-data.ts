@@ -1,4 +1,4 @@
-export interface Invoice {
+export type Invoice = {
   id: string;
   invoiceNumber: string;
   contactName: string;
@@ -10,7 +10,8 @@ export interface Invoice {
   createdAt: string;
   dueDate: string;
   paidAt?: string;
-}
+  notes?: string;
+};
 
 export const mockInvoices: Invoice[] = [
   {
