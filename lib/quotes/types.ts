@@ -1,9 +1,9 @@
-export interface QuoteItem {
+export type QuoteItem = {
   description: string;
   amount: number;
-}
+};
 
-export interface Quote {
+export type Quote = {
   id: string;
   quoteNumber: string;
   contactName: string;
@@ -17,4 +17,4 @@ export interface Quote {
   acceptedDate?: string;
   validUntil: string;
   notes?: string;
-}
+};

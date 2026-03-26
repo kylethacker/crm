@@ -6,6 +6,14 @@ export function formatCurrency(amount: number): string {
   return `$${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
+export function formatDate(value: string): string {
+  return new Date(value).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
+}
+
 export function formatRelativeTime(timestamp: string): string {
   const date = new Date(timestamp);
   const diffMs = Date.now() - date.getTime();

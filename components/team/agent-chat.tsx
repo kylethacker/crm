@@ -6,8 +6,8 @@ import { DefaultChatTransport } from 'ai';
 import type { MarketplaceAgentContext } from '@/lib/chat/chat-history';
 import type { AgentSettings } from '@/lib/marketplace/types';
 import { getSuggestedResponses } from '@/lib/chat/suggested-responses';
+import { ChatComposer } from '@/components/chat/chat-composer';
 import { MessageItem } from '@/components/chat/message';
-import { ArrowUpIcon, StopIcon } from '@/components/icons';
 
 type AgentChatProps = {
   agentContext: MarketplaceAgentContext;
@@ -19,7 +19,6 @@ type AgentChatProps = {
 export function AgentChat({ agentContext, agentSettings, initialMessage }: AgentChatProps) {
   const [input, setInput] = useState('');
   const scrollRef = useRef<HTMLDivElement>(null);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const initialSent = useRef(false);
 
   const agentContextRef = useRef(agentContext);
@@ -66,31 +65,16 @@ export function AgentChat({ agentContext, agentSettings, initialMessage }: Agent
       if (!text.trim() || isPending) return;
       sendMessage({ text: text.trim() });
       setInput('');
-      if (textareaRef.current) textareaRef.current.style.height = 'auto';
     },
     [isPending, sendMessage],
   );
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSubmit(input);
-    }
-  };
-
-  const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setInput(e.target.value);
-    const el = e.target;
-    el.style.height = 'auto';
-    el.style.height = `${Math.min(el.scrollHeight, 160)}px`;
-  };
-
   const suggestions = useMemo(() => getSuggestedResponses(messages, status), [messages, status]);
 
   return (
-    <div className="flex flex-1 flex-col">
+    <div className="flex min-h-0 flex-1 flex-col">
       {/* Messages */}
-      <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4">
+      <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto px-4 py-4">
         {messages.length === 0 ? (
           <div className="flex h-full flex-col items-center justify-center text-center">
             <p className="text-sm font-medium text-neutral-900 dark:text-neutral-100">
@@ -147,43 +131,16 @@ export function AgentChat({ agentContext, agentSettings, initialMessage }: Agent
       </div>
 
       {/* Input */}
-      <div className="border-t border-neutral-200/60 px-4 py-3 dark:border-neutral-800/60">
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            handleSubmit(input);
-          }}
-          className="relative mx-auto max-w-[720px] overflow-hidden rounded-xl bg-white shadow-[0_1px_2px_rgba(0,0,0,0.04),0_0_0_1px_rgba(0,0,0,0.06)] dark:bg-neutral-900 dark:shadow-[0_1px_2px_rgba(0,0,0,0.2),0_0_0_1px_rgba(255,255,255,0.06)]"
-        >
-          <textarea
-            ref={textareaRef}
-            value={input}
-            onChange={handleInput}
-            onKeyDown={handleKeyDown}
-            placeholder={`Ask ${agentContext.agentName}...`}
-            rows={1}
-            className="block w-full resize-none bg-transparent px-3 pt-2.5 pb-2 text-sm leading-relaxed outline-none placeholder:text-neutral-400 dark:text-white"
-          />
-          <div className="flex justify-end px-2 pb-2">
-            {isPending ? (
-              <button
-                type="button"
-                onClick={stop}
-                className="flex size-7 cursor-pointer items-center justify-center rounded-full bg-neutral-900 text-white transition-colors hover:bg-neutral-700 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200"
-              >
-                <StopIcon />
-              </button>
-            ) : (
-              <button
-                type="submit"
-                disabled={!input.trim()}
-                className="flex size-7 cursor-pointer items-center justify-center rounded-full bg-neutral-900 text-white transition-colors hover:bg-neutral-700 disabled:cursor-default disabled:opacity-30 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200"
-              >
-                <ArrowUpIcon />
-              </button>
-            )}
-          </div>
-        </form>
+      <div className="p-4">
+        <ChatComposer
+          value={input}
+          onChange={setInput}
+          onSubmit={() => handleSubmit(input)}
+          onStop={stop}
+          isPending={isPending}
+          placeholder={`Ask ${agentContext.agentName}...`}
+          className="mx-auto max-w-[720px]"
+        />
       </div>
     </div>
   );

@@ -15,7 +15,7 @@ export function TeamCard({ activeAgents, availableCount, pendingCount }: TeamCar
   return (
     <Link
       href="/team"
-      className="flex flex-col rounded-xl border border-neutral-200 bg-white px-5 py-4 transition-colors hover:bg-neutral-50 dark:border-neutral-800 dark:bg-neutral-900 dark:hover:bg-neutral-800/70"
+      className="flex flex-col rounded-lg border border-neutral-200/70 bg-app-surface px-5 py-4 transition-colors hover:bg-neutral-50/80 dark:border-neutral-800 dark:bg-neutral-900 dark:hover:bg-neutral-800/70"
     >
       <h3 className="text-xs font-medium text-neutral-500 dark:text-neutral-400">
         Your Agents

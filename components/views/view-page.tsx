@@ -2,9 +2,17 @@
 
 import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { EntityDrawerHost } from '@/components/entity-drawers/entity-drawer-host';
+import type { EntityDrawerState } from '@/components/entity-drawers/types';
 import { formatCurrency } from '@/lib/format';
 import { useViews } from '@/lib/views/context';
-import { fetchViewData, type ContactRow, type InvoiceRow, type QuoteRow } from '@/lib/views/data';
+import {
+  getViewRowId,
+  useViewData,
+  type ContactRow,
+  type InvoiceRow,
+  type QuoteRow,
+} from '@/lib/views/data';
 import type { TableView, TableViewType } from '@/lib/views/types';
 import { StatusBadge } from '@/components/chat/tool-renderers/data-table';
 
@@ -77,6 +85,12 @@ const typeLabels: Record<TableViewType, string> = {
   contacts: 'Contacts',
   invoices: 'Invoices',
   quotes: 'Quotes',
+};
+
+const addButtonLabels: Record<TableViewType, string> = {
+  contacts: 'Add contact',
+  invoices: 'Add invoice',
+  quotes: 'Add quote',
 };
 
 // ── Sort icon ────────────────────────────────────────────────────────────────
@@ -159,9 +173,10 @@ export function ViewPage({ viewId }: { viewId: string }) {
 function ViewTable({ view, onDelete }: { view: TableView; onDelete: () => void }) {
   const [sortKey, setSortKey] = useState<string | null>(null);
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
+  const [drawerState, setDrawerState] = useState<EntityDrawerState | null>(null);
 
   const columns = getColumns(view.type);
-  const rawData = useMemo(() => fetchViewData(view.type, view.filters) as Record<string, unknown>[], [view.type, view.filters]);
+  const rawData = useViewData(view.type, view.filters) as Record<string, unknown>[];
 
   const rows = useMemo(() => {
     if (!sortKey) return rawData;
@@ -198,13 +213,24 @@ function ViewTable({ view, onDelete }: { view: TableView; onDelete: () => void }
               <FilterPills filters={view.filters} />
             </div>
           </div>
-          <button
-            type="button"
-            onClick={onDelete}
-            className="rounded-lg px-3 py-1.5 text-xs font-medium text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-neutral-700 dark:hover:bg-neutral-800 dark:hover:text-neutral-300"
-          >
-            Remove view
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() =>
+                setDrawerState({ entityType: view.type })
+              }
+              className="rounded-lg bg-neutral-900 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-neutral-800 dark:bg-neutral-100 dark:text-neutral-900 dark:hover:bg-white"
+            >
+              {addButtonLabels[view.type]}
+            </button>
+            <button
+              type="button"
+              onClick={onDelete}
+              className="rounded-lg px-3 py-1.5 text-xs font-medium text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-neutral-700 dark:hover:bg-neutral-800 dark:hover:text-neutral-300"
+            >
+              Remove view
+            </button>
+          </div>
         </div>
       </div>
 
@@ -229,22 +255,49 @@ function ViewTable({ view, onDelete }: { view: TableView; onDelete: () => void }
               </tr>
             </thead>
             <tbody className="divide-y divide-neutral-100 dark:divide-neutral-800/60">
-              {rows.map((row, i) => (
-                <tr key={i} className="transition-colors hover:bg-neutral-50 dark:hover:bg-neutral-900/50">
-                  {columns.map((col) => (
-                    <td
-                      key={col.key}
-                      className={`px-6 py-3 text-sm text-neutral-700 dark:text-neutral-300 ${col.align === 'right' ? 'text-right' : 'text-left'}`}
-                    >
-                      {col.render(row)}
-                    </td>
-                  ))}
-                </tr>
-              ))}
+              {rows.map((row) => {
+                const rowId = getViewRowId(view.type, row);
+                const isSelected = drawerState?.recordId === rowId;
+                return (
+                  <tr
+                    key={rowId}
+                    role="button"
+                    tabIndex={0}
+                    aria-selected={isSelected}
+                    onClick={() =>
+                      setDrawerState({
+                        entityType: view.type,
+                        recordId: rowId,
+                      })
+                    }
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        setDrawerState({
+                          entityType: view.type,
+                          recordId: rowId,
+                        });
+                      }
+                    }}
+                    className="cursor-pointer transition-colors hover:bg-neutral-50 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-neutral-400 dark:hover:bg-neutral-900/50 dark:focus-visible:outline-neutral-500"
+                  >
+                    {columns.map((col) => (
+                      <td
+                        key={col.key}
+                        className={`px-6 py-3 text-sm text-neutral-700 dark:text-neutral-300 ${col.align === 'right' ? 'text-right' : 'text-left'}`}
+                      >
+                        {col.render(row)}
+                      </td>
+                    ))}
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         )}
       </div>
+
+      <EntityDrawerHost state={drawerState} onStateChange={setDrawerState} />
     </div>
   );
 }

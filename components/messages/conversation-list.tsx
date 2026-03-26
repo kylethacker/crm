@@ -63,10 +63,10 @@ export function ConversationList({ conversations, activeId, onSelect }: Conversa
     : `${conversations.length} conversations`;
 
   return (
-    <div className="flex h-full flex-col border-r border-neutral-200 dark:border-neutral-800">
-      <div className="shrink-0 border-b border-neutral-200 dark:border-neutral-800">
+    <div className="flex h-full flex-col border-r border-neutral-200/70 bg-app-surface dark:border-neutral-800 dark:bg-neutral-950">
+      <div className="shrink-0 border-b border-neutral-200/70 dark:border-neutral-800">
         <div className="flex items-center justify-between px-4 py-3">
-          <h2 className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">Customers</h2>
+          <h2 className="text-sm font-semibold tracking-tight text-neutral-900 dark:text-neutral-100">Customers</h2>
           <span className="text-xs text-neutral-400">{countLabel}</span>
         </div>
         <div className="px-4 pb-3">
@@ -107,8 +107,8 @@ export function ConversationList({ conversations, activeId, onSelect }: Conversa
               className={cn(
                 'flex w-full cursor-pointer gap-3 px-4 py-3 text-left transition-colors',
                 isActive
-                  ? 'bg-neutral-100 dark:bg-neutral-800/80'
-                  : 'hover:bg-neutral-50 dark:hover:bg-neutral-800/40',
+                  ? 'bg-neutral-100/90 dark:bg-neutral-800/60'
+                  : 'hover:bg-neutral-50/90 dark:hover:bg-neutral-800/30',
               )}
             >
               <div className="relative shrink-0">

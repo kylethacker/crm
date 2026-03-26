@@ -132,7 +132,7 @@ export function Chat() {
 
   return (
     <div className="flex h-full">
-      <div className="relative min-w-0 flex-1">
+      <div className="relative min-w-0 flex-1 bg-app-surface dark:bg-neutral-950">
         <button
           type="button"
           onClick={() => router.back()}
@@ -160,7 +160,7 @@ export function Chat() {
                   key={prompt.text}
                   type="button"
                   onClick={() => handleSubmit(prompt.text)}
-                  className="cursor-pointer rounded-full border border-neutral-200 bg-white px-4 py-2 text-sm font-medium text-neutral-600 shadow-sm transition-all hover:bg-neutral-50 hover:shadow-md active:scale-[0.98] dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300 dark:hover:bg-neutral-800"
+                  className="cursor-pointer rounded-md border border-neutral-200/80 bg-app-surface px-3.5 py-2 text-sm font-medium text-neutral-600 transition-colors hover:bg-neutral-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300 dark:hover:bg-neutral-800"
                 >
                   {prompt.label}
                 </button>

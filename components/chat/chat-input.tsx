@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useRef } from 'react';
-import { ArrowUpIcon, StopIcon } from '@/components/icons';
+import { useState } from 'react';
 import { type AgentName, AGENT_NAMES, AGENT_DISPLAY } from '@/lib/ai/agents';
+import { ChatComposer } from './chat-composer';
 
 type ChatInputProps = {
   onSubmit: (text: string) => void;
@@ -20,73 +20,26 @@ export function ChatInput({
   onAgentChange,
 }: ChatInputProps) {
   const [input, setInput] = useState('');
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const text = input.trim();
-    if (!text || isPending) return;
-
-    setInput('');
-    if (textareaRef.current) textareaRef.current.style.height = 'auto';
-    onSubmit(text);
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSubmit(e);
-    }
-  };
-
-  const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setInput(e.target.value);
-    const el = e.target;
-    el.style.height = 'auto';
-    el.style.height = `${Math.min(el.scrollHeight, 200)}px`;
-  };
 
   return (
     <>
-      <form
-        onSubmit={handleSubmit}
-        className="relative w-full max-w-3xl overflow-hidden rounded-2xl border border-neutral-200 bg-white dark:border-neutral-700 dark:bg-neutral-950"
-      >
-        <textarea
-          ref={textareaRef}
-          value={input}
-          onChange={handleInput}
-          onKeyDown={handleKeyDown}
-          placeholder="Message AI Chat..."
-          autoFocus
-          rows={2}
-          className="block w-full resize-none bg-transparent px-4 pt-3 pb-2 text-sm leading-relaxed outline-none placeholder:text-neutral-400 disabled:cursor-not-allowed disabled:opacity-50 dark:text-white"
-        />
-        <div className="flex items-center justify-between px-3 pb-3">
-          <AgentSelector agent={agent} onAgentChange={onAgentChange} />
-
-          {isPending ? (
-            <button
-              type="button"
-              onClick={onStop}
-              className="flex size-8 cursor-pointer items-center justify-center rounded-full bg-neutral-900 text-white transition-colors hover:bg-neutral-700 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200"
-            >
-              <StopIcon />
-              <span className="sr-only">Stop</span>
-            </button>
-          ) : (
-            <button
-              type="submit"
-              disabled={!input.trim()}
-              className="flex size-8 cursor-pointer items-center justify-center rounded-full bg-neutral-900 text-white transition-colors hover:bg-neutral-700 disabled:cursor-default disabled:opacity-30 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200"
-            >
-              <ArrowUpIcon />
-              <span className="sr-only">Send</span>
-            </button>
-          )}
-        </div>
-      </form>
-
+      <ChatComposer
+        value={input}
+        onChange={setInput}
+        onSubmit={() => {
+          const text = input.trim();
+          if (!text) return;
+          setInput('');
+          onSubmit(text);
+        }}
+        onStop={onStop}
+        isPending={isPending}
+        placeholder="Message AI Chat..."
+        autoFocus
+        rows={2}
+        className="w-full max-w-3xl"
+        footer={<AgentSelector agent={agent} onAgentChange={onAgentChange} />}
+      />
       <p className="relative text-center text-xs text-neutral-400 dark:text-neutral-600">
         AI can make mistakes. Verify important information.
       </p>

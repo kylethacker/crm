@@ -18,6 +18,10 @@ const rendererLoaders: Partial<Record<ToolName, LazyLoader>> = {
   getQuotes: () => import('./get-quotes').then((m) => ({ default: m.GetQuotesResult as ComponentType<RendererProps> })),
   sendInvoice: () => import('./send-invoice').then((m) => ({ default: m.SendInvoiceResult as ComponentType<RendererProps> })),
   sendMessage: () => import('./send-message').then((m) => ({ default: m.SendMessageResult as ComponentType<RendererProps> })),
+  getContactSummary: () => import('./get-contact-summary').then((m) => ({ default: m.GetContactSummaryResult as ComponentType<RendererProps> })),
+  getTodaySchedule: () => import('./get-today-schedule').then((m) => ({ default: m.GetTodayScheduleResult as ComponentType<RendererProps> })),
+  generateDesign: () => import('./generate-design').then((m) => ({ default: m.GenerateDesignResult as ComponentType<RendererProps> })),
+  hireAgent: () => import('./hire-agent').then((m) => ({ default: m.HireAgentResult as ComponentType<RendererProps> })),
 };
 
 // Pre-create lazy components at module scope so they are stable across renders.

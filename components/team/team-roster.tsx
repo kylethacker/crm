@@ -2,7 +2,7 @@
 
 import { useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import type { AgentDefinition, ActiveAgent, AutonomyLevel } from '@/lib/marketplace/types';
+import type { AgentDefinition, ActiveAgent } from '@/lib/marketplace/types';
 import { agentDefinitions, buildHirePrompt } from '@/lib/marketplace/data';
 import { useActiveAgents } from '@/lib/marketplace/active-agents-context';
 import { MarketplaceAgentIcon } from '@/components/marketplace/agent-icon';
@@ -13,7 +13,6 @@ import {
   autonomyLabel,
   autonomyDescription,
   autonomyColor,
-  formatOutcomeValue,
 } from '@/lib/marketplace/format';
 import {
   Dialog,
@@ -65,9 +64,6 @@ export function TeamRoster() {
     router.push('/chat');
   };
 
-  // Aggregate outcomes across all active agents for the value summary
-  const allOutcomes = hired.flatMap(({ active }) => Object.entries(active.outcomes));
-
   return (
     <div className="flex-1 overflow-y-auto">
       <div className="mx-auto grid max-w-[960px] grid-cols-1 gap-3 px-4 pt-8 pb-64 sm:grid-cols-2">
@@ -84,18 +80,6 @@ export function TeamRoster() {
                 : 'Hire agents to handle work while you focus on what matters'}
             </p>
           </div>
-          {allOutcomes.length > 0 && (
-            <div className="flex flex-wrap items-baseline justify-end gap-x-4 gap-y-0.5 text-right">
-              {allOutcomes.map(([key, value]) => (
-                <div key={key} className="flex items-baseline gap-1">
-                  <span className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">
-                    {formatOutcomeValue(key, value)}
-                  </span>
-                  <span className="text-[11px] text-neutral-400 dark:text-neutral-500">{key}</span>
-                </div>
-              ))}
-            </div>
-          )}
         </div>
 
         {/* ── Pending approvals — spans full width ── */}
@@ -120,24 +104,19 @@ export function TeamRoster() {
         )}
 
         {/* ── Active agents — grid cards ── */}
-        {hired.map(({ active: a, def }) => {
-          const agentPending = a.recentActions.filter((act) => act.status === 'proposed').length;
-          return (
+        {hired.map(({ active: a, def }) => (
             <button
               key={def.id}
               type="button"
               onClick={() => router.push(`/team/${def.id}`)}
-              className={cn(
-                'flex h-full cursor-pointer flex-col rounded-2xl bg-black/3 p-5 text-left transition-colors hover:bg-black/5 dark:bg-white/4 dark:hover:bg-white/6',
-                agentPending > 0 && 'ring-1 ring-amber-300 dark:ring-amber-700/50',
-              )}
+              className="flex h-full cursor-pointer flex-col rounded-2xl bg-black/3 p-5 text-left transition-colors hover:bg-black/5 dark:bg-white/4 dark:hover:bg-white/6"
             >
               <div className="flex items-start gap-3">
                 <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-white shadow-[0_1px_2px_rgba(0,0,0,0.06)] dark:bg-neutral-800 dark:shadow-none">
                   <MarketplaceAgentIcon agentId={def.id} size="md" />
                 </span>
                 <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
                     <h3 className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">
                       {def.name}
                     </h3>
@@ -150,50 +129,13 @@ export function TeamRoster() {
                       </span>
                     )}
                   </div>
-                  <p className="mt-0.5 text-xs text-neutral-500 dark:text-neutral-400">
+                  <p className="mt-1.5 text-xs leading-relaxed text-neutral-500 dark:text-neutral-400">
                     {def.role}
                   </p>
                 </div>
               </div>
-
-              {/* Outcomes */}
-              <div className="mt-4 flex flex-wrap gap-x-5 gap-y-1">
-                {Object.entries(a.outcomes).map(([key, value]) => (
-                  <div key={key} className="flex items-baseline gap-1.5">
-                    <span className="text-sm font-bold text-neutral-900 dark:text-neutral-100">
-                      {formatOutcomeValue(key, value)}
-                    </span>
-                    <span className="text-xs text-neutral-500 dark:text-neutral-400">{key}</span>
-                  </div>
-                ))}
-              </div>
-
-              {/* Recent activity */}
-              {a.recentActions.length > 0 && (
-                <div className="mt-3 border-t border-black/5 pt-2.5 dark:border-white/5">
-                  <p className="text-[10px] font-medium uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
-                    Recent
-                  </p>
-                  <div className="mt-1.5 flex flex-col gap-1">
-                    {a.recentActions.slice(0, 2).map((act) => (
-                      <div key={act.id} className="flex items-center gap-2">
-                        <span className={cn(
-                          'size-1.5 shrink-0 rounded-full',
-                          act.status === 'proposed' ? 'bg-amber-400' :
-                          act.status === 'executed' ? 'bg-green-400' :
-                          'bg-neutral-300',
-                        )} />
-                        <p className="truncate text-xs text-neutral-600 dark:text-neutral-400">
-                          {act.description}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
             </button>
-          );
-        })}
+        ))}
 
         {/* ── Marketplace header — spans full width ── */}
         {available.length > 0 && (
@@ -216,28 +158,23 @@ export function TeamRoster() {
             className="group flex h-full cursor-pointer flex-col rounded-2xl bg-black/3 p-5 text-left transition-colors hover:bg-black/5 dark:bg-white/4 dark:hover:bg-white/6"
           >
             <div className="flex items-start gap-3">
-              <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-white shadow-[0_1px_2px_rgba(0,0,0,0.06)] dark:bg-neutral-800 dark:shadow-none">
-                <MarketplaceAgentIcon agentId={def.id} size="lg" />
+              <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-white shadow-[0_1px_2px_rgba(0,0,0,0.06)] dark:bg-neutral-800 dark:shadow-none">
+                <MarketplaceAgentIcon agentId={def.id} size="md" />
               </span>
               <div className="min-w-0 flex-1">
-                <div className="flex items-center justify-between gap-3">
+                <div className="flex flex-wrap items-center gap-2">
                   <h3 className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">
                     {def.name}
                   </h3>
-                  <span className="shrink-0 text-sm font-semibold text-neutral-900 dark:text-neutral-100">
-                    {def.price === 0 ? 'Free' : `$${def.price}/mo`}
+                  <span className={cn('rounded-full px-2 py-0.5 text-[10px] font-medium', autonomyColor[def.defaultAutonomy])}>
+                    {autonomyLabel[def.defaultAutonomy]}
                   </span>
                 </div>
-                <p className="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
-                  &ldquo;{def.problem}&rdquo;
+                <p className="mt-1.5 text-xs leading-relaxed text-neutral-500 dark:text-neutral-400">
+                  {def.role}
                 </p>
               </div>
             </div>
-            {def.expectedOutcome && (
-              <p className="mt-3 text-xs font-medium text-green-700 dark:text-green-400">
-                {def.expectedOutcome}
-              </p>
-            )}
           </button>
         ))}
       </div>

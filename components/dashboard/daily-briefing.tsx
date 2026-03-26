@@ -6,7 +6,10 @@ import { TeamBriefingCard } from './cards/team-briefing-card';
 export function DailyBriefingHeader({ greeting }: { greeting: string }) {
   return (
     <div className="col-span-full">
-      <h1 className="mb-1 text-2xl font-semibold text-neutral-900 dark:text-neutral-100">
+      <p className="mb-1 text-[11px] font-medium uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+        Workspace
+      </p>
+      <h1 className="mb-1 text-2xl font-semibold tracking-tight text-neutral-900 dark:text-neutral-100">
         {greeting}
       </h1>
       <p className="text-sm text-neutral-500 dark:text-neutral-400">

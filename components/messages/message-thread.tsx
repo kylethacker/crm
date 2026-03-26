@@ -2,7 +2,8 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { cn } from '@/lib/utils';
-import { ArrowUpIcon, SparklesIcon } from '@/components/icons';
+import { SparklesIcon } from '@/components/icons';
+import { ChatComposer } from '@/components/chat/chat-composer';
 import type { Conversation, TextMessage } from '@/lib/messages/types';
 
 type MessageThreadProps = {
@@ -177,7 +178,6 @@ function AiSuggestionCard({ conversation, onUseSuggestion }: { conversation: Con
 export function MessageThread({ conversation }: MessageThreadProps) {
   const [input, setInput] = useState('');
   const scrollRef = useRef<HTMLDivElement>(null);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -185,34 +185,12 @@ export function MessageThread({ conversation }: MessageThreadProps) {
     }
   }, [conversation.contact.id]);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!input.trim()) return;
-    // Will be wired to Twilio later
-    setInput('');
-    if (textareaRef.current) textareaRef.current.style.height = 'auto';
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSubmit(e);
-    }
-  };
-
-  const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setInput(e.target.value);
-    const el = e.target;
-    el.style.height = 'auto';
-    el.style.height = `${Math.min(el.scrollHeight, 150)}px`;
-  };
-
   const { contact, messages } = conversation;
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex h-full min-h-0 flex-col">
       {/* Messages area */}
-      <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4">
+      <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto px-4 py-4">
         <div className="mx-auto flex max-w-2xl flex-col gap-2">
           {messages.map((message, i) => (
             <div key={message.id}>
@@ -229,40 +207,20 @@ export function MessageThread({ conversation }: MessageThreadProps) {
 
           <AiSuggestionCard
             conversation={conversation}
-            onUseSuggestion={(text) => {
-              setInput(text);
-              textareaRef.current?.focus();
-            }}
+            onUseSuggestion={(text) => setInput(text)}
           />
         </div>
       </div>
 
       {/* Input area */}
-      <div className="border-t border-neutral-200 p-4 dark:border-neutral-800">
-        <form
-          onSubmit={handleSubmit}
-          className="mx-auto flex max-w-2xl items-end gap-2"
-        >
-          <div className="flex-1 overflow-hidden rounded-2xl border border-neutral-200 bg-white dark:border-neutral-700 dark:bg-neutral-900">
-            <textarea
-              ref={textareaRef}
-              value={input}
-              onChange={handleInput}
-              onKeyDown={handleKeyDown}
-              placeholder={`Text ${contact.name.split(' ')[0]}...`}
-              rows={1}
-              className="block w-full resize-none bg-transparent px-4 py-2.5 text-sm leading-relaxed outline-none placeholder:text-neutral-400 dark:text-white"
-            />
-          </div>
-          <button
-            type="submit"
-            disabled={!input.trim()}
-            className="flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-full bg-neutral-900 text-white transition-colors hover:bg-neutral-700 disabled:cursor-default disabled:opacity-30 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200"
-          >
-            <ArrowUpIcon />
-            <span className="sr-only">Send</span>
-          </button>
-        </form>
+      <div className="p-4">
+        <ChatComposer
+          value={input}
+          onChange={setInput}
+          onSubmit={() => setInput('')}
+          placeholder={`Text ${contact.name.split(' ')[0]}...`}
+          className="mx-auto max-w-2xl"
+        />
       </div>
     </div>
   );

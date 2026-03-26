@@ -105,12 +105,46 @@ const primaryNavItems = [
     ),
   },
   {
+    label: 'Calendar',
+    href: '/calendar',
+    icon: (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+        <line x1="16" y1="2" x2="16" y2="6" />
+        <line x1="8" y1="2" x2="8" y2="6" />
+        <line x1="3" y1="10" x2="21" y2="10" />
+      </svg>
+    ),
+  },
+  {
     label: 'Customers',
     href: '/messages',
     icon: (
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
         <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
         <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
+      </svg>
+    ),
+  },
+  {
+    label: 'Discoverability',
+    href: '/discoverability',
+    icon: (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <circle cx="11" cy="11" r="8" />
+        <line x1="21" y1="21" x2="16.65" y2="16.65" />
+      </svg>
+    ),
+  },
+  {
+    label: 'Studio',
+    href: '/studio',
+    icon: (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <path d="M12 19l7-7 3 3-7 7-3-3z" />
+        <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z" />
+        <path d="M2 2l7.586 7.586" />
+        <circle cx="11" cy="11" r="2" />
       </svg>
     ),
   },
@@ -123,8 +157,8 @@ function sidebarItemClass({ active, collapsed }: SidebarLinkClass) {
     'flex items-center gap-2.5 rounded-md px-2 py-1 text-sm transition-colors',
     collapsed ? 'justify-center px-0' : '',
     active
-      ? 'bg-neutral-200/95 font-medium text-neutral-900 dark:bg-neutral-700/90 dark:text-neutral-100'
-      : 'text-neutral-600 hover:bg-neutral-200/55 dark:text-neutral-400 dark:hover:bg-neutral-800/80',
+      ? 'bg-neutral-200/80 font-medium text-neutral-900 dark:bg-neutral-800 dark:text-neutral-100'
+      : 'text-neutral-600 hover:bg-neutral-200/50 dark:text-neutral-400 dark:hover:bg-neutral-800/60',
   );
 }
 
@@ -164,7 +198,7 @@ export function AppSidebar() {
   return (
     <aside
       className={cn(
-        'flex h-dvh shrink-0 flex-col overflow-x-hidden border-r border-neutral-200/90 bg-[#f4f4f5] transition-[width] duration-200 ease-out dark:border-neutral-800 dark:bg-neutral-950',
+        'flex h-dvh shrink-0 flex-col overflow-x-hidden border-r border-neutral-200/70 bg-app-sidebar transition-[width] duration-200 ease-out dark:border-neutral-800 dark:bg-neutral-950',
         collapsed ? 'w-[52px]' : 'w-64',
       )}
     >
@@ -378,7 +412,7 @@ export function AppSidebar() {
       </div>
 
       {/* Footer */}
-      <div className="flex shrink-0 items-center justify-between gap-2 border-t border-neutral-200/90 px-2 py-2.5 dark:border-neutral-800">
+      <div className="flex shrink-0 items-center justify-between gap-2 border-t border-neutral-200/60 px-2 py-2.5 dark:border-neutral-800">
         <Link
           href="/dashboard"
           className="flex size-9 shrink-0 items-center justify-center rounded-md text-neutral-500 transition-colors hover:bg-neutral-200/80 hover:text-neutral-800 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-200"

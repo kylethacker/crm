@@ -22,6 +22,14 @@
     "Source Code Pro", monospace;
 
   --animate-fade-in: fadeIn 300ms ease-out forwards;
+
+  /*
+   * App shell — Linear-inspired neutrals: cool gray canvas, white surfaces,
+   * hairline borders. Use bg-app-canvas on main, bg-app-surface on cards/panels.
+   */
+  --color-app-canvas: #f7f8f9;
+  --color-app-surface: #ffffff;
+  --color-app-sidebar: #fafafa;
 }
 
 @keyframes fadeIn {

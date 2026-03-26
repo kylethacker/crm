@@ -23,7 +23,7 @@ export function TeamBriefingCard({ reports, gaps, pendingApprovals }: TeamBriefi
   };
 
   return (
-    <div className="flex min-h-[120px] w-full flex-col rounded-xl border border-neutral-200 bg-white px-5 py-4 dark:border-neutral-800 dark:bg-neutral-900">
+    <div className="flex min-h-[120px] w-full flex-col rounded-lg border border-neutral-200/70 bg-app-surface px-5 py-4 dark:border-neutral-800 dark:bg-neutral-900">
       <h3 className="text-xs font-medium text-neutral-500 dark:text-neutral-400">
         Agent Updates
       </h3>
