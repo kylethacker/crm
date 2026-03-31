@@ -60,6 +60,72 @@ const contacts: Contact[] = [
     tags: ['inbound', 'website-signup'],
     createdAt: '2026-03-04T13:00:00Z',
   },
+  {
+    id: '6',
+    name: 'Alex Rivera',
+    phone: '+1 (555) 678-9012',
+    email: 'alex.rivera@gmail.com',
+    status: 'lead',
+    lastContacted: '2026-03-27T09:48:00Z',
+    notes: 'Inquiring about full bathroom remodel — 80 sq ft master bath.',
+    tags: ['inbound', 'remodel'],
+    createdAt: '2026-03-27T09:30:00Z',
+  },
+  {
+    id: '7',
+    name: 'David Kim',
+    phone: '+1 (555) 789-0123',
+    email: 'david.kim@outlook.com',
+    status: 'customer',
+    lastContacted: '2026-03-20T10:00:00Z',
+    notes: 'Sent $1,800 quote for bathroom tile replacement. Invoice #1033 ($2,500) overdue 31 days.',
+    tags: ['tile', 'overdue'],
+    createdAt: '2025-09-10T08:00:00Z',
+  },
+  {
+    id: '8',
+    name: 'Nora Sato',
+    phone: '+1 (555) 890-1234',
+    email: 'nora.sato@gmail.com',
+    status: 'prospect',
+    lastContacted: '2026-03-08T11:00:00Z',
+    notes: 'Sent $2,200 quote for kitchen backsplash. Quote expires Mar 19.',
+    tags: ['kitchen', 'quote-sent'],
+    createdAt: '2026-02-28T14:00:00Z',
+  },
+  {
+    id: '9',
+    name: 'Rachel Kim',
+    phone: '+1 (555) 901-2345',
+    email: 'rachel.k@gmail.com',
+    status: 'customer',
+    lastContacted: '2026-03-26T08:15:00Z',
+    notes: 'Left a 5-star Google review. Regular client — haircuts.',
+    tags: ['review', 'regular'],
+    createdAt: '2025-08-20T10:00:00Z',
+  },
+  {
+    id: '10',
+    name: 'Tom Brennan',
+    phone: '+1 (555) 012-3456',
+    email: 'tom.brennan@yahoo.com',
+    status: 'customer',
+    lastContacted: '2026-03-26T07:45:00Z',
+    notes: 'Left a 4-star Google review — mentioned wait time issue.',
+    tags: ['review'],
+    createdAt: '2025-10-05T09:00:00Z',
+  },
+  {
+    id: '11',
+    name: 'Janet Liu',
+    phone: '+1 (555) 321-6540',
+    email: 'janet.liu@icloud.com',
+    status: 'customer',
+    lastContacted: '2026-03-25T19:30:00Z',
+    notes: 'Left a 2-star review — unhappy with color treatment. Needs follow-up to make it right.',
+    tags: ['review', 'needs-attention'],
+    createdAt: '2025-11-12T11:00:00Z',
+  },
 ];
 
 const messagesByContact: Record<string, TextMessage[]> = {
@@ -88,6 +154,29 @@ const messagesByContact: Record<string, TextMessage[]> = {
   ],
   '5': [
     { id: 'm16', contactId: '5', text: 'Hi! I signed up on your website and had a few questions about the platform.', direction: 'inbound', timestamp: '2026-03-04T13:00:00Z', status: 'read' },
+  ],
+  '6': [
+    { id: 'm17', contactId: '6', text: "Hi there! I'm looking to get my master bathroom completely remodeled — new tile, vanity, fixtures, the works. The room is about 80 sq ft. Could you give me a rough estimate and your availability for the next few weeks? Thanks!", direction: 'inbound', timestamp: '2026-03-27T09:30:00Z', status: 'read' },
+  ],
+  '7': [
+    { id: 'm18', contactId: '7', text: 'Hey David, just sent over the tile replacement quote — let me know if you have any questions!', direction: 'outbound', timestamp: '2026-03-13T10:00:00Z', status: 'read' },
+    { id: 'm19', contactId: '7', text: "Got it, thanks! I'll take a look this weekend.", direction: 'inbound', timestamp: '2026-03-13T10:30:00Z', status: 'read' },
+  ],
+  '8': [
+    { id: 'm20', contactId: '8', text: "Hi Nora! Here's the quote for the kitchen backsplash we discussed. Let me know what you think!", direction: 'outbound', timestamp: '2026-03-08T11:00:00Z', status: 'delivered' },
+  ],
+  '9': [
+    { id: 'm21', contactId: '9', text: 'Thanks for coming in today, Rachel! Hope you love the new cut.', direction: 'outbound', timestamp: '2026-03-25T16:00:00Z', status: 'read' },
+    { id: 'm22', contactId: '9', text: 'I love it! You always nail it. Already left you a review on Google 😊', direction: 'inbound', timestamp: '2026-03-25T17:00:00Z', status: 'read' },
+  ],
+  '10': [
+    { id: 'm23', contactId: '10', text: 'Thanks for coming in, Tom! Let me know if you need anything.', direction: 'outbound', timestamp: '2026-03-24T15:00:00Z', status: 'read' },
+    { id: 'm24', contactId: '10', text: 'Haircut looks great, appreciate it. Just wish I didn\'t have to wait so long!', direction: 'inbound', timestamp: '2026-03-24T16:00:00Z', status: 'read' },
+  ],
+  '11': [
+    { id: 'm25', contactId: '11', text: 'Hi Janet, how are you liking the color?', direction: 'outbound', timestamp: '2026-03-24T14:00:00Z', status: 'read' },
+    { id: 'm26', contactId: '11', text: "Honestly, it came out way darker than I wanted. I showed you reference photos and it's nothing like them. Pretty disappointed.", direction: 'inbound', timestamp: '2026-03-25T10:00:00Z', status: 'read' },
+    { id: 'm27', contactId: '11', text: "I'm really sorry to hear that, Janet. I'd love to get you back in for a correction at no charge — would this week work?", direction: 'outbound', timestamp: '2026-03-25T10:30:00Z', status: 'delivered' },
   ],
 };
 
@@ -121,6 +210,25 @@ const bookingsByContact: Record<string, Booking[]> = {
     { id: 'b14', contactId: '4', title: 'February Check-in', date: '2026-02-20', time: '11:00 AM', duration: 30, status: 'cancelled', notes: 'Client requested to cancel' },
   ],
   '5': [],
+  '6': [],
+  '7': [
+    { id: 'b21', contactId: '7', title: 'Bathroom Tile Replacement', date: '2026-03-13', time: '10:00 AM', duration: 30, status: 'completed', amount: 1800, notes: 'Quote sent for tile replacement' },
+    { id: 'b22', contactId: '7', title: 'Callback — Quote Discussion', date: '2026-03-27', time: '4:30 PM', duration: 30, status: 'upcoming', notes: 'Wants to discuss tile quote' },
+  ],
+  '8': [
+    { id: 'b23', contactId: '8', title: 'Kitchen Backsplash Estimate', date: '2026-03-05', time: '11:00 AM', duration: 45, status: 'completed', amount: 0, notes: 'On-site measurement and discussion' },
+  ],
+  '9': [
+    { id: 'b24', contactId: '9', title: 'Haircut', date: '2026-03-25', time: '3:00 PM', duration: 30, status: 'completed', amount: 450 },
+    { id: 'b25', contactId: '9', title: 'Haircut', date: '2026-04-22', time: '3:00 PM', duration: 30, status: 'upcoming' },
+  ],
+  '10': [
+    { id: 'b26', contactId: '10', title: 'Haircut', date: '2026-03-24', time: '2:00 PM', duration: 30, status: 'completed', amount: 400 },
+  ],
+  '11': [
+    { id: 'b27', contactId: '11', title: 'Color Treatment', date: '2026-03-23', time: '1:00 PM', duration: 90, status: 'completed', amount: 1200 },
+    { id: 'b28', contactId: '11', title: 'Color Correction (Complimentary)', date: '2026-03-28', time: '1:00 PM', duration: 90, status: 'upcoming', notes: 'Free fix-up for unsatisfactory color result' },
+  ],
 };
 
 const activityByContact: Record<string, ActivityEvent[]> = {
@@ -166,6 +274,36 @@ const activityByContact: Record<string, ActivityEvent[]> = {
     { id: 'a31', type: 'message', description: 'Priya reached out with questions about the platform', timestamp: '2026-03-04T13:00:00Z' },
     { id: 'a32', type: 'tag-added', description: 'Tag "website-signup" added', timestamp: '2026-03-04T13:00:00Z' },
     { id: 'a33', type: 'created', description: 'Contact created', timestamp: '2026-03-04T13:00:00Z' },
+  ],
+  '6': [
+    { id: 'a34', type: 'message', description: 'Alex inquired about full bathroom remodel', timestamp: '2026-03-27T09:30:00Z' },
+    { id: 'a35', type: 'created', description: 'Contact created', timestamp: '2026-03-27T09:30:00Z' },
+  ],
+  '7': [
+    { id: 'a36', type: 'message', description: 'David confirmed he\'d review the tile quote', timestamp: '2026-03-13T10:30:00Z' },
+    { id: 'a37', type: 'booking', description: 'Callback scheduled for Mar 27 at 4:30 PM', timestamp: '2026-03-27T08:15:00Z' },
+    { id: 'a38', type: 'created', description: 'Contact created', timestamp: '2025-09-10T08:00:00Z' },
+  ],
+  '8': [
+    { id: 'a39', type: 'booking', description: 'Kitchen backsplash estimate completed', timestamp: '2026-03-05T12:00:00Z' },
+    { id: 'a40', type: 'message', description: 'Quote sent for kitchen backsplash — $2,200', timestamp: '2026-03-08T11:00:00Z' },
+    { id: 'a41', type: 'created', description: 'Contact created', timestamp: '2026-02-28T14:00:00Z' },
+  ],
+  '9': [
+    { id: 'a42', type: 'booking', description: 'Haircut completed', timestamp: '2026-03-25T15:30:00Z' },
+    { id: 'a43', type: 'message', description: 'Rachel left a 5-star Google review', timestamp: '2026-03-25T17:00:00Z' },
+    { id: 'a44', type: 'created', description: 'Contact created', timestamp: '2025-08-20T10:00:00Z' },
+  ],
+  '10': [
+    { id: 'a45', type: 'booking', description: 'Haircut completed', timestamp: '2026-03-24T14:30:00Z' },
+    { id: 'a46', type: 'message', description: 'Tom mentioned wait time issue', timestamp: '2026-03-24T16:00:00Z' },
+    { id: 'a47', type: 'created', description: 'Contact created', timestamp: '2025-10-05T09:00:00Z' },
+  ],
+  '11': [
+    { id: 'a48', type: 'booking', description: 'Color treatment completed — $120', timestamp: '2026-03-23T14:30:00Z' },
+    { id: 'a49', type: 'message', description: 'Janet reported unhappy with color result', timestamp: '2026-03-25T10:00:00Z' },
+    { id: 'a50', type: 'booking', description: 'Color correction scheduled for Mar 28', timestamp: '2026-03-25T10:30:00Z' },
+    { id: 'a51', type: 'created', description: 'Contact created', timestamp: '2025-11-12T11:00:00Z' },
   ],
 };
 

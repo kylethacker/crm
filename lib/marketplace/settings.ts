@@ -15,6 +15,11 @@ export function resolveSettings(
         ? overrides[setting.key]!
         : setting.default;
   }
+  if (overrides) {
+    for (const [key, value] of Object.entries(overrides)) {
+      if (!(key in result)) result[key] = value;
+    }
+  }
   return result;
 }
 

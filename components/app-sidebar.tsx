@@ -9,11 +9,23 @@ import { XIcon } from '@/components/icons';
 import { useChatHistory } from '@/lib/chat/chat-history-context';
 import { useViews } from '@/lib/views/context';
 import { agentDefinitions } from '@/lib/marketplace/data';
+import { useActiveAgents } from '@/lib/marketplace/active-agents-context';
+import { useScenario } from '@/lib/demo/scenario-context';
+import { getScenarioMeta } from '@/lib/demo/scenarios';
+import { AgentSettingsPanel } from '@/components/agents/agent-settings-panel';
+import { DevResetButton } from '@/components/dev-reset-button';
 
-const SIDEBAR_AGENT_PREVIEW_COUNT = 4;
-
-/** Shown in the sidebar header; initials are derived automatically. */
-const SIDEBAR_ACCOUNT_NAME = 'Kyle Thacker';
+/** Order in which enabled agents should appear in the sidebar */
+const enabledAgentOrder = [
+  'speed-to-lead',
+  'review-responder',
+  'reputation-builder',
+  'deal-closer',
+  'friendly-collector',
+  'receptionist',
+  'week-planner',
+  'social-media',
+];
 
 function getInitials(name: string) {
   const parts = name.trim().split(/\s+/).filter(Boolean);
@@ -95,12 +107,12 @@ const viewTypeIcons: Record<string, React.ReactNode> = {
 
 const primaryNavItems = [
   {
-    label: 'Dashboard',
+    label: 'Home',
     href: '/dashboard',
     icon: (
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-        <circle cx="12" cy="12" r="10" />
-        <polyline points="12 6 12 12 16 14" />
+        <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+        <polyline points="9 22 9 12 15 12 15 22" />
       </svg>
     ),
   },
@@ -181,9 +193,25 @@ export function AppSidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const { sessions, activeSessionId, createSession, selectSession, deleteSession } = useChatHistory();
   const { views, removeView } = useViews();
+  const { agents: contextAgents } = useActiveAgents();
+  const { scenarioId } = useScenario();
+  const scenarioMeta = getScenarioMeta(scenarioId);
 
-  const sidebarAgents = agentDefinitions.slice(0, SIDEBAR_AGENT_PREVIEW_COUNT);
-  const accountInitials = getInitials(SIDEBAR_ACCOUNT_NAME);
+  // Build enabled agents list in the specified order
+  const activeAgentIds = new Set(contextAgents.map((a) => a.agentId));
+  const enabledAgents = enabledAgentOrder
+    .filter((id) => activeAgentIds.has(id))
+    .map((id) => agentDefinitions.find((d) => d.id === id))
+    .filter(Boolean) as typeof agentDefinitions;
+  // Any active agents not in the explicit order go at the end
+  const remainingActive = contextAgents
+    .filter((a) => !enabledAgentOrder.includes(a.agentId))
+    .map((a) => agentDefinitions.find((d) => d.id === a.agentId))
+    .filter(Boolean) as typeof agentDefinitions;
+  const sidebarAgents = [...enabledAgents, ...remainingActive];
+  const hasMoreAgents = agentDefinitions.length > sidebarAgents.length;
+  const accountInitials = getInitials(scenarioMeta.ownerFullName);
+  const [agentSettingsOpen, setAgentSettingsOpen] = useState(false);
 
   const handleNewChat = () => {
     createSession();
@@ -218,7 +246,7 @@ export function AppSidebar() {
           </div>
           {!collapsed && (
             <span className="min-w-0 flex-1 truncate text-sm font-semibold text-neutral-900 dark:text-neutral-100">
-              {SIDEBAR_ACCOUNT_NAME}
+              {scenarioMeta.ownerFullName}
             </span>
           )}
         </div>
@@ -256,7 +284,27 @@ export function AppSidebar() {
 
         {/* Agents */}
         <div className="mt-5">
-          <SectionLabel collapsed={collapsed}>Agents</SectionLabel>
+          {collapsed ? (
+            <SectionLabel collapsed={collapsed}>Agents</SectionLabel>
+          ) : (
+            <div className="mb-1 flex items-center justify-between px-2">
+              <p className="text-[11px] font-medium tracking-wide text-neutral-500 dark:text-neutral-500">
+                Agents
+              </p>
+              <button
+                type="button"
+                onClick={() => setAgentSettingsOpen(true)}
+                className="flex size-5 items-center justify-center rounded text-neutral-400 transition-colors hover:bg-neutral-200/60 hover:text-neutral-600 dark:text-neutral-500 dark:hover:bg-neutral-700/60 dark:hover:text-neutral-300"
+                aria-label="Agent settings"
+                title="Agent settings"
+              >
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
+                  <circle cx="12" cy="12" r="3" />
+                </svg>
+              </button>
+            </div>
+          )}
           <div className="flex flex-col gap-0.5">
             {sidebarAgents.map((def) => {
               const href = `/team/${def.id}`;
@@ -273,14 +321,16 @@ export function AppSidebar() {
                 </Link>
               );
             })}
-            <Link
-              href="/team"
-              title={collapsed ? 'More' : undefined}
-              className={sidebarItemClass({ active: pathname === '/team', collapsed })}
-            >
-              <span className="shrink-0 text-neutral-500 dark:text-neutral-400">{moreAgentsIcon}</span>
-              {!collapsed && 'More'}
-            </Link>
+            {hasMoreAgents && (
+              <Link
+                href="/team"
+                title={collapsed ? 'More agents' : undefined}
+                className={sidebarItemClass({ active: pathname === '/team', collapsed })}
+              >
+                <span className="shrink-0 text-neutral-500 dark:text-neutral-400">{moreAgentsIcon}</span>
+                {!collapsed && 'More'}
+              </Link>
+            )}
           </div>
         </div>
 
@@ -411,6 +461,9 @@ export function AppSidebar() {
         </div>
       </div>
 
+      {/* Dev controls */}
+      <DevResetButton collapsed={collapsed} />
+
       {/* Footer */}
       <div className="flex shrink-0 items-center justify-between gap-2 border-t border-neutral-200/60 px-2 py-2.5 dark:border-neutral-800">
         <Link
@@ -423,6 +476,8 @@ export function AppSidebar() {
         </Link>
         <ThemeToggle />
       </div>
+
+      <AgentSettingsPanel open={agentSettingsOpen} onOpenChange={setAgentSettingsOpen} />
     </aside>
   );
 }

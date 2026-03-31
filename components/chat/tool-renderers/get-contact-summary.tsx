@@ -123,9 +123,11 @@ export function GetContactSummaryResult({ data }: { data: ContactSummaryOutput }
             <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium capitalize ${statusColors[contact.status] ?? 'bg-neutral-100 text-neutral-500'}`}>
               {contact.status}
             </span>
-            <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${health.className}`}>
-              {health.label}
-            </span>
+            {health && (
+              <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${health.className}`}>
+                {health.label}
+              </span>
+            )}
           </div>
           <p className="mt-0.5 text-xs text-neutral-500 dark:text-neutral-400">
             {contact.email}

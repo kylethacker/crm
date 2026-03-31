@@ -2,7 +2,6 @@ import type { Metadata, Viewport } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import { Providers } from '@/components/providers';
 import { AppSidebar } from '@/components/app-sidebar';
-import { DevResetButton } from '@/components/dev-reset-button';
 import './globals.css';
 
 // ── Fonts ─────────────────────────────────────────────────────────────────────
@@ -20,9 +19,7 @@ const geistMono = Geist_Mono({
 // ── Metadata ──────────────────────────────────────────────────────────────────
 
 export const metadata: Metadata = {
-  title: {
-    default: 'Dashboard',
-  },
+  title: 'Dashboard',
   description: 'Your AI-powered CRM coworker for small businesses.',
 };
 
@@ -55,7 +52,6 @@ export default function RootLayout({
             <AppSidebar />
             <main className="h-full min-w-0 flex-1 overflow-y-auto bg-app-canvas dark:bg-neutral-950">{children}</main>
           </div>
-          <DevResetButton />
         </Providers>
       </body>
     </html>

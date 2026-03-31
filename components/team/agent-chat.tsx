@@ -5,27 +5,56 @@ import { useChat } from '@ai-sdk/react';
 import { DefaultChatTransport } from 'ai';
 import type { MarketplaceAgentContext } from '@/lib/chat/chat-history';
 import type { AgentSettings } from '@/lib/marketplace/types';
+import type { ActionQueueCard } from '@/lib/dashboard/types';
 import { getSuggestedResponses } from '@/lib/chat/suggested-responses';
 import { ChatComposer } from '@/components/chat/chat-composer';
 import { MessageItem } from '@/components/chat/message';
+import { EditContextBlock } from '@/components/chat/edit-context-block';
 
 type AgentChatProps = {
   agentContext: MarketplaceAgentContext;
   agentSettings?: AgentSettings;
   /** Auto-send this message on mount (used for onboarding after hire) */
   initialMessage?: string;
+  /** Card data for edit mode — renders context block + sends hidden system context to LLM */
+  editCard?: ActionQueueCard | null;
+  /** Called after the edit card is consumed */
+  onEditCardConsumed?: () => void;
 };
 
-export function AgentChat({ agentContext, agentSettings, initialMessage }: AgentChatProps) {
+/** Build hidden system context for the LLM so it knows the draft without restating it */
+function buildEditSystemContext(card: ActionQueueCard): string {
+  const parts: string[] = [
+    `The user wants to edit a ${card.category.toLowerCase()} draft${card.contactName ? ` for ${card.contactName}` : ''}.`,
+  ];
+  if (card.inboundMessage) parts.push(`Customer message: "${card.inboundMessage}"`);
+  if (card.contextSummary) parts.push(`Context: ${card.contextSummary}`);
+  if (card.body) parts.push(`Description: ${card.body}`);
+  if (card.draftContent) parts.push(`Current draft reply: "${card.draftContent}"`);
+  if (card.attachments?.length) {
+    parts.push(`Attachments: ${card.attachments.map((a) => `${a.label}${a.meta ? ` (${a.meta})` : ''}`).join(', ')}`);
+  }
+  parts.push('The user can already see the draft and context in the UI. Do NOT restate or summarize them. Just ask what changes they would like to make.');
+  return parts.join('\n');
+}
+
+export function AgentChat({ agentContext, agentSettings, initialMessage, editCard, onEditCardConsumed }: AgentChatProps) {
   const [input, setInput] = useState('');
   const scrollRef = useRef<HTMLDivElement>(null);
   const initialSent = useRef(false);
+  const editSentId = useRef<string | null>(null);
+
+  // Track the active edit card (persists after consumed so the UI block stays)
+  const [activeEditCard, setActiveEditCard] = useState<ActionQueueCard | null>(null);
 
   const agentContextRef = useRef(agentContext);
   agentContextRef.current = agentContext;
 
   const agentSettingsRef = useRef(agentSettings);
   agentSettingsRef.current = agentSettings;
+
+  // Track edit context for transport
+  const editContextRef = useRef<string | undefined>(undefined);
 
   const transportRef = useRef(
     new DefaultChatTransport({
@@ -34,6 +63,7 @@ export function AgentChat({ agentContext, agentSettings, initialMessage }: Agent
         marketplaceAgentId: agentContextRef.current.agentId,
         agentSettings: agentSettingsRef.current,
         marketplaceAgentContext: agentContextRef.current,
+        ...(editContextRef.current ? { editContext: editContextRef.current } : {}),
       }),
     }),
   );
@@ -54,11 +84,23 @@ export function AgentChat({ agentContext, agentSettings, initialMessage }: Agent
     }
   }, [initialMessage, sendMessage]);
 
+  // Handle edit card injection — track by card ID so each new card fires
+  useEffect(() => {
+    if (editCard && editCard.id !== editSentId.current) {
+      editSentId.current = editCard.id;
+      setActiveEditCard(editCard);
+      editContextRef.current = buildEditSystemContext(editCard);
+      const who = editCard.contactName ? ` for ${editCard.contactName}` : '';
+      sendMessage({ text: `I want to edit this ${editCard.category.toLowerCase()} draft${who}.` });
+      onEditCardConsumed?.();
+    }
+  }, [editCard, sendMessage, onEditCardConsumed]);
+
   // Auto-scroll to bottom
   useEffect(() => {
     const el = scrollRef.current;
     if (el) el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
-  }, [messages]);
+  }, [messages, activeEditCard]);
 
   const handleSubmit = useCallback(
     (text: string) => {
@@ -71,11 +113,14 @@ export function AgentChat({ agentContext, agentSettings, initialMessage }: Agent
 
   const suggestions = useMemo(() => getSuggestedResponses(messages, status), [messages, status]);
 
+  // Whether we're showing the edit context (show it once the card is set, before any messages)
+  const showEditContext = !!activeEditCard;
+
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       {/* Messages */}
       <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto px-4 py-4">
-        {messages.length === 0 ? (
+        {!showEditContext && messages.length === 0 ? (
           <div className="flex h-full flex-col items-center justify-center text-center">
             <p className="text-sm font-medium text-neutral-900 dark:text-neutral-100">
               Talk to {agentContext.agentName}
@@ -102,6 +147,25 @@ export function AgentChat({ agentContext, agentSettings, initialMessage }: Agent
           </div>
         ) : (
           <div className="mx-auto flex max-w-[720px] flex-col gap-4">
+            {/* Pre-rendered edit context block (before any messages) */}
+            {showEditContext && (
+              <div className="flex gap-3">
+                <div className="flex size-7 shrink-0 items-center justify-center rounded-full bg-neutral-900 dark:bg-white">
+                  <span className="text-xs font-medium text-white dark:text-neutral-900">
+                    AI
+                  </span>
+                </div>
+                <div className="min-w-0 flex-1 space-y-3 pt-0.5">
+                  <EditContextBlock card={activeEditCard!} />
+                  {messages.length === 0 && !isPending && (
+                    <p className="text-sm leading-relaxed text-neutral-700 dark:text-neutral-300">
+                      What changes would you like to make?
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
+
             {messages.map((msg) => (
               <MessageItem key={msg.id} message={msg} isStreaming={isStreaming && msg.id === messages[messages.length - 1]?.id} />
             ))}
@@ -138,7 +202,7 @@ export function AgentChat({ agentContext, agentSettings, initialMessage }: Agent
           onSubmit={() => handleSubmit(input)}
           onStop={stop}
           isPending={isPending}
-          placeholder={`Ask ${agentContext.agentName}...`}
+          placeholder={activeEditCard ? 'Describe your changes...' : `Ask ${agentContext.agentName}...`}
           className="mx-auto max-w-[720px]"
         />
       </div>

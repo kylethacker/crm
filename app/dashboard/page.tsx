@@ -1,6 +1,8 @@
 import { connection } from 'next/server';
-import { getCrmStats, getAgentActivityStats, getReviewStats, getPipelineStats, getWebsiteAnalyticsStats } from '@/lib/dashboard/stats';
+import { cookies } from 'next/headers';
 import { getDailyBriefing } from '@/lib/dashboard/briefing';
+import { getScenarioConversations, getScenarioActiveAgents, getScenarioMeta } from '@/lib/demo/scenarios';
+import type { ScenarioId } from '@/lib/demo/scenarios';
 import { DashboardGrid } from '@/components/dashboard/dashboard-grid';
 
 export const metadata = {
@@ -9,21 +11,17 @@ export const metadata = {
 
 export default async function DashboardPage() {
   await connection();
-  const crmStats = getCrmStats();
-  const activityStats = getAgentActivityStats();
-  const reviewStats = getReviewStats();
-  const pipelineStats = getPipelineStats();
-  const websiteAnalyticsStats = getWebsiteAnalyticsStats();
-  const briefing = getDailyBriefing();
 
-  return (
-    <DashboardGrid
-      crmStats={crmStats}
-      activityStats={activityStats}
-      reviewStats={reviewStats}
-      pipelineStats={pipelineStats}
-      websiteAnalyticsStats={websiteAnalyticsStats}
-      briefing={briefing}
-    />
-  );
+  const cookieStore = await cookies();
+  const scenarioId = (cookieStore.get('crm-demo-scenario')?.value ?? 'busy') as ScenarioId;
+  const meta = getScenarioMeta(scenarioId);
+
+  const briefing = getDailyBriefing({
+    scenarioId,
+    conversations: getScenarioConversations(scenarioId),
+    activeAgentOverrides: getScenarioActiveAgents(scenarioId),
+    ownerName: meta.ownerName,
+  });
+
+  return <DashboardGrid briefing={briefing} />;
 }

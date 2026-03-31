@@ -2,24 +2,56 @@
 
 import { createContext, useCallback, useContext, useMemo, useState, useEffect } from 'react';
 import type { ActiveAgent, AutonomyLevel, AgentAction, AgentSettings } from './types';
-import { activeAgents as initialAgents } from './data';
+import { getScenarioActiveAgents } from '@/lib/demo/scenarios';
+import type { ScenarioId } from '@/lib/demo/scenarios';
 
-const STORAGE_KEY = 'crm-active-agents';
+const SCENARIO_KEY = 'crm-demo-scenario';
+const STORAGE_PREFIX = 'crm-active-agents';
+const VERSION_PREFIX = 'crm-active-agents-v';
+// Bump this when mock data changes to invalidate stale localStorage
+const DATA_VERSION = 5;
+
+function getStoredScenario(): ScenarioId {
+  if (typeof window === 'undefined') return 'busy';
+  try {
+    const stored = localStorage.getItem(SCENARIO_KEY) as ScenarioId | null;
+    if (stored && ['busy', 'handled', 'fresh'].includes(stored)) return stored;
+  } catch {}
+  return 'busy';
+}
+
+function storageKeyFor(scenarioId: ScenarioId) {
+  return `${STORAGE_PREFIX}-${scenarioId}`;
+}
+
+function versionKeyFor(scenarioId: ScenarioId) {
+  return `${VERSION_PREFIX}-${scenarioId}`;
+}
 
 function loadAgents(): ActiveAgent[] {
-  if (typeof window === 'undefined') return initialAgents;
+  const scenarioId = getStoredScenario();
+  if (typeof window === 'undefined') return getScenarioActiveAgents(scenarioId);
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) return JSON.parse(raw) as ActiveAgent[];
+    const storedVersion = localStorage.getItem(versionKeyFor(scenarioId));
+    if (storedVersion && Number(storedVersion) === DATA_VERSION) {
+      const raw = localStorage.getItem(storageKeyFor(scenarioId));
+      if (raw) return JSON.parse(raw) as ActiveAgent[];
+    } else {
+      // Version mismatch — clear stale data
+      localStorage.removeItem(storageKeyFor(scenarioId));
+      localStorage.setItem(versionKeyFor(scenarioId), String(DATA_VERSION));
+    }
   } catch {
     // fall through
   }
-  return initialAgents;
+  return getScenarioActiveAgents(scenarioId);
 }
 
 function persistAgents(agents: ActiveAgent[]) {
+  const scenarioId = getStoredScenario();
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(agents));
+    localStorage.setItem(storageKeyFor(scenarioId), JSON.stringify(agents));
+    localStorage.setItem(versionKeyFor(scenarioId), String(DATA_VERSION));
   } catch {
     // storage full or unavailable
   }
@@ -39,9 +71,9 @@ type ActiveAgentsContextValue = {
 const ActiveAgentsContext = createContext<ActiveAgentsContextValue | null>(null);
 
 export function ActiveAgentsProvider({ children }: { children: React.ReactNode }) {
-  const [agents, setAgents] = useState<ActiveAgent[]>(initialAgents);
+  const [agents, setAgents] = useState<ActiveAgent[]>(() => getScenarioActiveAgents(getStoredScenario()));
 
-  // Hydrate from localStorage on mount
+  // Hydrate from localStorage on mount (may have locally-modified state)
   useEffect(() => {
     setAgents(loadAgents());
   }, []);

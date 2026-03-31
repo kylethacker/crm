@@ -1,11 +1,13 @@
 'use client';
 
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import type { AgentDefinition, AgentSettingDef, AutonomyLevel } from '@/lib/marketplace/types';
 import { resolveSettings } from '@/lib/marketplace/settings';
 import { buildHirePrompt } from '@/lib/marketplace/data';
 import { useActiveAgents } from '@/lib/marketplace/active-agents-context';
+import { useContactsStore } from '@/lib/contacts/store';
+import Link from 'next/link';
 import {
   autonomyLabel,
   autonomyDescription,
@@ -17,8 +19,11 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { AgentChat } from './agent-chat';
 import { MarketplaceAgentIcon } from '@/components/marketplace/agent-icon';
+import { ActionCard } from '@/components/dashboard/action-card';
+import { actionsToCards } from '@/lib/dashboard/briefing';
+import type { ActionQueueCard } from '@/lib/dashboard/types';
 
-const AUTONOMY_LEVELS: AutonomyLevel[] = ['suggest', 'draft-approve', 'auto'];
+const AUTONOMY_LEVELS: AutonomyLevel[] = ['draft-approve', 'auto'];
 
 type AgentSidebarTab = 'activity' | 'settings';
 
@@ -31,6 +36,7 @@ export function AgentDetail({ agentDef }: { agentDef: AgentDefinition }) {
   const searchParams = useSearchParams();
   const isOnboarding = searchParams.get('onboard') === '1';
   const { getAgent, approveAction, dismissAction, togglePause, setAutonomy, updateSetting } = useActiveAgents();
+  const { conversations } = useContactsStore();
   const active = getAgent(agentDef.id);
 
   const [sidebarWidth, setSidebarWidth] = useState(DEFAULT_SIDEBAR_WIDTH);
@@ -76,6 +82,32 @@ export function AgentDetail({ agentDef }: { agentDef: AgentDefinition }) {
 
   const onboardingMessage = isOnboarding ? buildHirePrompt(agentDef) : undefined;
 
+  // ── Edit injection: from sidebar card or from home page navigation ──
+  const [editCard, setEditCard] = useState<ActionQueueCard | null>(null);
+  const editConsumed = useRef(false);
+
+  // Check for ?edit=1 from home page — read card data from sessionStorage
+  useEffect(() => {
+    if (searchParams.get('edit') === '1' && !editConsumed.current) {
+      editConsumed.current = true;
+      const raw = sessionStorage.getItem('agent-edit-card');
+      if (raw) {
+        sessionStorage.removeItem('agent-edit-card');
+        try {
+          setEditCard(JSON.parse(raw) as ActionQueueCard);
+        } catch { /* ignore bad data */ }
+      }
+    }
+  }, [searchParams]);
+
+  const handleCardEdit = useCallback((card: ActionQueueCard) => {
+    setEditCard(card);
+  }, []);
+
+  const handleEditCardConsumed = useCallback(() => {
+    setEditCard(null);
+  }, []);
+
   return (
     <div className="flex h-full">
       {/* ── Main: Chat ── */}
@@ -96,6 +128,8 @@ export function AgentDetail({ agentDef }: { agentDef: AgentDefinition }) {
           agentContext={agentContext}
           agentSettings={resolvedSettings}
           initialMessage={onboardingMessage}
+          editCard={editCard}
+          onEditCardConsumed={handleEditCardConsumed}
         />
       </div>
 
@@ -195,42 +229,18 @@ export function AgentDetail({ agentDef }: { agentDef: AgentDefinition }) {
               )}
 
               {pendingActions.length > 0 && (
-                <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 dark:border-amber-800/40 dark:bg-amber-900/20">
-                  <div className="flex items-center gap-2">
-                    <h2 className="text-xs font-semibold text-amber-900 dark:text-amber-200">
+                <div>
+                  <div className="mb-2 flex items-center gap-2">
+                    <h2 className="text-xs font-semibold text-neutral-900 dark:text-neutral-100">
                       Needs Approval
                     </h2>
-                    <span className="flex size-4 items-center justify-center rounded-full bg-amber-200 text-[9px] font-bold dark:bg-amber-800">
+                    <span className="flex size-4 items-center justify-center rounded-full bg-amber-200 text-[9px] font-bold text-amber-800 dark:bg-amber-800 dark:text-amber-200">
                       {pendingActions.length}
                     </span>
                   </div>
-                  <div className="mt-2 flex flex-col gap-1.5">
-                    {pendingActions.map((action) => (
-                      <div
-                        key={action.id}
-                        className="rounded-lg bg-white p-2.5 dark:bg-neutral-900"
-                      >
-                        <p className="text-xs text-neutral-900 dark:text-neutral-100">
-                          {action.description}
-                        </p>
-                        <div className="mt-1.5 flex items-center gap-1.5">
-                          <Button
-                            size="sm"
-                            className="h-6 px-2 text-[11px]"
-                            onClick={() => approveAction(agentDef.id, action.id)}
-                          >
-                            Approve
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-6 px-2 text-[11px]"
-                            onClick={() => dismissAction(agentDef.id, action.id)}
-                          >
-                            Dismiss
-                          </Button>
-                        </div>
-                      </div>
+                  <div className="flex flex-col gap-2">
+                    {actionsToCards(pendingActions).map((card) => (
+                      <ActionCard key={card.id} card={card} onEdit={handleCardEdit} />
                     ))}
                   </div>
                 </div>
@@ -243,32 +253,55 @@ export function AgentDetail({ agentDef }: { agentDef: AgentDefinition }) {
                   </h2>
                   {active.recentActions.length > 0 ? (
                     <div className="mt-2 flex flex-col gap-0">
-                      {active.recentActions.map((action, i) => (
-                        <div key={action.id} className="flex gap-2.5 py-2">
-                          <div className="flex flex-col items-center">
-                            <span className={cn(
-                              'mt-1 size-1.5 shrink-0 rounded-full',
-                              action.status === 'proposed' ? 'bg-amber-400' :
-                              action.status === 'approved' ? 'bg-blue-400' :
-                              action.status === 'executed' ? 'bg-green-400' :
-                              'bg-neutral-300 dark:bg-neutral-600',
-                            )} />
-                            {i < active.recentActions.length - 1 && (
-                              <div className="mt-1 w-px flex-1 bg-neutral-200 dark:bg-neutral-800" />
-                            )}
-                          </div>
-                          <div className="min-w-0 flex-1 pb-0.5">
-                            <p className="text-xs text-neutral-700 dark:text-neutral-300">
-                              {action.description}
-                            </p>
-                            <div className="mt-0.5 flex items-center gap-1.5 text-[11px] text-neutral-400 dark:text-neutral-500">
-                              {action.contactName && <span>{action.contactName}</span>}
-                              {action.contactName && <span>·</span>}
-                              <span>{formatRelativeTime(action.createdAt)}</span>
+                      {active.recentActions.map((action, i) => {
+                        const handleViewDetails = () => {
+                          if (action.contactName) {
+                            const match = conversations.find((c) => c.contact.name === action.contactName);
+                            if (match) {
+                              router.push(`/messages?contactId=${match.contact.id}`);
+                            }
+                          }
+                        };
+                        const viewDetailsBtnClass =
+                          'mt-1 shrink-0 rounded-md border border-neutral-200 bg-white px-2 py-0.5 text-[10px] font-medium text-neutral-600 opacity-0 transition-all hover:bg-neutral-50 group-hover:opacity-100 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700';
+                        return (
+                          <div key={action.id} className="group flex gap-2.5 py-2">
+                            <div className="flex flex-col items-center">
+                              <span className={cn(
+                                'mt-1 size-1.5 shrink-0 rounded-full',
+                                action.status === 'proposed' ? 'bg-amber-400' :
+                                action.status === 'approved' ? 'bg-blue-400' :
+                                action.status === 'executed' ? 'bg-green-400' :
+                                'bg-neutral-300 dark:bg-neutral-600',
+                              )} />
+                              {i < active.recentActions.length - 1 && (
+                                <div className="mt-1 w-px flex-1 bg-neutral-200 dark:bg-neutral-800" />
+                              )}
+                            </div>
+                            <div className="min-w-0 flex-1 pb-0.5">
+                              <div className="flex items-start gap-2">
+                                <p className="min-w-0 flex-1 text-xs text-neutral-700 dark:text-neutral-300">
+                                  {action.description}
+                                </p>
+                                {action.contactName ? (
+                                  <button type="button" onClick={handleViewDetails} className={viewDetailsBtnClass}>
+                                    View details
+                                  </button>
+                                ) : (
+                                  <Link href={`/team/${action.agentId}`} className={viewDetailsBtnClass}>
+                                    View details
+                                  </Link>
+                                )}
+                              </div>
+                              <div className="mt-0.5 flex items-center gap-1.5 text-[11px] text-neutral-400 dark:text-neutral-500">
+                                {action.contactName && <span>{action.contactName}</span>}
+                                {action.contactName && <span>·</span>}
+                                <span>{formatRelativeTime(action.createdAt)}</span>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   ) : (
                     <p className="mt-2 text-xs text-neutral-500 dark:text-neutral-400">
@@ -311,9 +344,29 @@ export function AgentDetail({ agentDef }: { agentDef: AgentDefinition }) {
                     </div>
                   </div>
 
-                  {agentDef.settings && agentDef.settings.length > 0 && (
+                  <div className="mt-4">
+                    <label
+                      htmlFor={`instructions-${agentDef.id}`}
+                      className="text-[11px] font-medium text-neutral-500 dark:text-neutral-400"
+                    >
+                      Custom Instructions
+                    </label>
+                    <textarea
+                      id={`instructions-${agentDef.id}`}
+                      value={(resolvedSettings['customInstructions'] as string) ?? ''}
+                      onChange={(e) => updateSetting(agentDef.id, 'customInstructions', e.target.value)}
+                      rows={3}
+                      placeholder="Add specific instructions for this agent..."
+                      className="mt-1.5 w-full rounded-lg border border-neutral-200 bg-white px-2.5 py-2 text-xs leading-relaxed text-neutral-800 placeholder-neutral-400 outline-none transition-colors focus:border-blue-300 focus:ring-2 focus:ring-blue-100 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-200 dark:placeholder-neutral-500 dark:focus:border-blue-600 dark:focus:ring-blue-900/40"
+                    />
+                    <p className="mt-1 text-[10px] text-neutral-400 dark:text-neutral-500">
+                      These instructions apply only to this agent.
+                    </p>
+                  </div>
+
+                  {agentDef.settings && agentDef.settings.filter((s) => s.key !== 'tone').length > 0 && (
                     <div className="mt-4 flex flex-col gap-3">
-                      {agentDef.settings.map((setting) => (
+                      {agentDef.settings.filter((s) => s.key !== 'tone').map((setting) => (
                         <SidebarSettingControl
                           key={setting.key}
                           setting={setting}

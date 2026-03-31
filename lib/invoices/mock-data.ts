@@ -15,6 +15,26 @@ export type Invoice = {
 
 export const mockInvoices: Invoice[] = [
   {
+    id: 'inv-lead-alex',
+    invoiceNumber: 'EST-1044',
+    contactName: 'Alex Rivera',
+    items: [
+      { description: 'Bathroom tile removal & prep', amount: 1200 },
+      { description: 'Floor & wall tile installation (80 sq ft)', amount: 3400 },
+      { description: 'Vanity & countertop', amount: 2100 },
+      { description: 'Fixtures (faucet, showerhead, hardware)', amount: 1350 },
+      { description: 'Plumbing labor', amount: 1100 },
+      { description: 'Cleanup & finishing', amount: 700 },
+    ],
+    subtotal: 9850,
+    tax: 0,
+    total: 9850,
+    status: 'draft',
+    createdAt: '2026-03-26T10:00:00Z',
+    dueDate: '2026-04-25',
+    notes: 'Estimate for full master bathroom remodel — 80 sq ft. Materials may vary based on selections.',
+  },
+  {
     id: 'inv-1',
     invoiceNumber: 'INV-1035',
     contactName: 'Sarah Chen',

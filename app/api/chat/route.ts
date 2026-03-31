@@ -117,6 +117,7 @@ const chatRequestSchema = z.object({
   studioContext: studioContextSchema,
   marketplaceAgentId: z.string().optional(),
   agentSettings: z.record(z.union([z.string(), z.number(), z.boolean()])).optional(),
+  editContext: z.string().optional(),
 });
 
 function buildBusinessContext(): string {
@@ -375,6 +376,7 @@ export async function POST(req: Request) {
       studioContext,
       marketplaceAgentId,
       agentSettings,
+      editContext,
     } = chatRequestSchema.parse(await req.json());
 
     const systemMessages: typeof messages = [];
@@ -410,6 +412,14 @@ export async function POST(req: Request) {
         id: 'marketplace-agent-context',
         role: 'system' as const,
         parts: [{ type: 'text' as const, text: buildMarketplaceAgentSystemMessage(marketplaceAgentContext)! }],
+      });
+    }
+
+    if (editContext) {
+      systemMessages.push({
+        id: 'edit-context',
+        role: 'system' as const,
+        parts: [{ type: 'text' as const, text: editContext }],
       });
     }
 

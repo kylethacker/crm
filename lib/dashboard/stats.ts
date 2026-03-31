@@ -2,6 +2,7 @@ import { getConversations } from '@/lib/messages/mock-data';
 import { getAgentActivities } from '@/lib/activity/mock-data';
 import { agentNameMap } from '@/lib/apps/data';
 import type { AgentActivityStatus } from '@/lib/activity/types';
+import type { Conversation } from '@/lib/messages/types';
 import type {
   CrmStats,
   AgentActivityStats,
@@ -12,10 +13,11 @@ import type {
   ContactsByStatus,
   BookingsByStatus,
   WebsiteAnalyticsStats,
+  BusinessPulseStats,
 } from './types';
 
-export function getCrmStats(): CrmStats {
-  const conversations = getConversations();
+export function getCrmStats(conversationsOverride?: Conversation[]): CrmStats {
+  const conversations = conversationsOverride ?? getConversations();
 
   const contactsByStatus: ContactsByStatus = { lead: 0, customer: 0, prospect: 0 };
   const bookingsByStatus: BookingsByStatus = { upcoming: 0, completed: 0, cancelled: 0, 'no-show': 0 };
@@ -198,6 +200,75 @@ export function getWebsiteAnalyticsStats(): WebsiteAnalyticsStats {
       { date: 'Mar 11', visitors: 105 },
       { date: 'Mar 12', visitors: 112 },
     ],
+  };
+}
+
+export function getBusinessPulseStats(): BusinessPulseStats {
+  const conversations = getConversations();
+  const reviewStats = getReviewStats();
+
+  // Count leads this week vs last week
+  let leadsThisWeek = 0;
+  let leadsLastWeek = 0;
+  const now = new Date();
+  const startOfThisWeek = new Date(now);
+  startOfThisWeek.setDate(now.getDate() - now.getDay());
+  startOfThisWeek.setHours(0, 0, 0, 0);
+  const startOfLastWeek = new Date(startOfThisWeek);
+  startOfLastWeek.setDate(startOfLastWeek.getDate() - 7);
+
+  for (const conv of conversations) {
+    if (conv.contact.status === 'lead') {
+      // Use the first message date as a proxy for when the lead came in
+      const firstMsg = conv.messages[0];
+      if (firstMsg) {
+        const msgDate = new Date(firstMsg.timestamp);
+        if (msgDate >= startOfThisWeek) leadsThisWeek++;
+        else if (msgDate >= startOfLastWeek) leadsLastWeek++;
+      }
+    }
+  }
+
+  // If mock data doesn't have enough date-based leads, use reasonable defaults
+  if (leadsThisWeek === 0) leadsThisWeek = 8;
+  if (leadsLastWeek === 0) leadsLastWeek = 5;
+
+  // Revenue this month and outstanding
+  let revenueThisMonth = 0;
+  let outstanding = 0;
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+  for (const conv of conversations) {
+    for (const booking of conv.bookings) {
+      if (booking.status === 'completed' && booking.amount) {
+        const bookingDate = new Date(booking.date);
+        if (bookingDate >= startOfMonth) {
+          revenueThisMonth += booking.amount;
+        }
+      }
+      if (booking.status === 'upcoming' && booking.amount) {
+        outstanding += booking.amount;
+      }
+    }
+  }
+
+  // Ensure reasonable mock values
+  if (revenueThisMonth === 0) revenueThisMonth = 4200;
+  if (outstanding === 0) outstanding = 850;
+
+  return {
+    leads: {
+      thisWeek: leadsThisWeek,
+      lastWeek: leadsLastWeek,
+    },
+    revenue: {
+      thisMonth: revenueThisMonth,
+      outstanding,
+    },
+    reputation: {
+      rating: reviewStats.averageRating,
+      newReviewsThisWeek: reviewStats.recentReviews.length,
+    },
   };
 }
 

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { SparklesIcon } from '@/components/icons';
 import type { Conversation } from '@/lib/messages/types';
@@ -17,8 +18,14 @@ type MessagesPageProps = {
 };
 
 export function MessagesPage({ conversations }: MessagesPageProps) {
-  const [activeId, setActiveId] = useState<string | null>(conversations[0]?.contact.id ?? null);
-  const [tab, setTab] = useState<Tab>('conversation');
+  const searchParams = useSearchParams();
+  const contactIdParam = searchParams.get('contactId');
+  const initialId = (contactIdParam && conversations.some((c) => c.contact.id === contactIdParam))
+    ? contactIdParam
+    : conversations[0]?.contact.id ?? null;
+
+  const [activeId, setActiveId] = useState<string | null>(initialId);
+  const [tab, setTab] = useState<Tab>(contactIdParam ? 'conversation' : 'conversation');
   const [aiSidebarOpen, setAiSidebarOpen] = useState(false);
 
   const activeConversation = conversations.find((c) => c.contact.id === activeId);
